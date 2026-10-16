@@ -24,3 +24,10 @@ Build command `npm run build`, output directory `dist`. Add a
 Set the variables listed in `.env.example` in the Vercel project settings.
 Keys without the `VITE_` prefix are server-only and must never be exposed to
 the browser. Use Stripe **test** keys until launch is explicitly authorised.
+
+## Single-file preview build
+
+`npx vite build --mode artifact` writes `dist-artifact/index.html`: one
+self-contained file (≈2.7 MB, fonts and images inlined, in-memory router)
+for sandboxed previews such as a claude.ai Artifact. It is a preview only:
+deep links don't work there, so use the normal build for real hosting.

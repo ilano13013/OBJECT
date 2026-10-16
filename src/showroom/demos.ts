@@ -1,4 +1,8 @@
 import type { ShowroomConfig } from './types'
+import formHero from '@/assets/renders/form-hero.webp'
+import formSide from '@/assets/renders/form-side.webp'
+import formTop from '@/assets/renders/form-top.webp'
+import formDetail from '@/assets/renders/form-detail.webp'
 
 /**
  * Three fictional brands that demonstrate what OBJECT. produces.
@@ -69,10 +73,10 @@ export const FORM: ShowroomConfig = {
     bodyFont: 'inter',
   },
   images: [
-    { src: '/renders/form-hero.webp', alt: 'Cuff 01 in brushed titanium, three-quarter view on a porcelain background' },
-    { src: '/renders/form-side.webp', alt: 'Cuff 01 seen from the side, showing the open gap' },
-    { src: '/renders/form-top.webp', alt: 'Cuff 01 from above, revealing the lime enamel lining' },
-    { src: '/renders/form-detail.webp', alt: 'Close-up of the cuff edge and its brushed finish' },
+    { src: formHero, alt: 'Cuff 01 in brushed titanium, three-quarter view on a porcelain background' },
+    { src: formSide, alt: 'Cuff 01 seen from the side, showing the open gap' },
+    { src: formTop, alt: 'Cuff 01 from above, revealing the lime enamel lining' },
+    { src: formDetail, alt: 'Close-up of the cuff edge and its brushed finish' },
   ],
   features: [
     { id: 'billet', title: 'One billet', body: 'Machined from a single block of grade 5 titanium. No joins, no solder.' },

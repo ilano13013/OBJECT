@@ -60,7 +60,7 @@ models, captured from a dev-only route:
 ```bash
 npm run dev &
 node scripts/capture-renders.mjs /tmp/renders
-python3 scripts/to-webp.py /tmp/renders public/renders
+python3 scripts/to-webp.py /tmp/renders src/assets/renders
 ```
 
 ## Docs

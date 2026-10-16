@@ -1,4 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
+import auraPoster from '@/assets/renders/aura-poster.webp'
+import formHero from '@/assets/renders/form-hero.webp'
+import monoPoster from '@/assets/renders/mono-poster.webp'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { gsap, useGSAP } from '@/lib/gsap'
@@ -12,7 +15,7 @@ const ROWS = [
     category: 'Fragrance',
     template: 'Orbit',
     mode: 'True 3D',
-    poster: '/renders/aura-poster.webp',
+    poster: auraPoster,
     tint: '#e8c9a4',
     line: 'Black, chrome and a crystal flacon you can turn in your hand.',
   },
@@ -23,7 +26,7 @@ const ROWS = [
     category: 'Design accessory',
     template: 'Editorial',
     mode: 'Photo Motion',
-    poster: '/renders/form-hero.webp',
+    poster: formHero,
     tint: '#d7ff43',
     line: 'Giant type, full-bleed imagery and a story told in scroll.',
   },
@@ -34,7 +37,7 @@ const ROWS = [
     category: 'Home object',
     template: 'Gallery',
     mode: 'True 3D',
-    poster: '/renders/mono-poster.webp',
+    poster: monoPoster,
     tint: '#d9d5cd',
     line: 'A single object on a plinth, lit like a museum piece.',
   },

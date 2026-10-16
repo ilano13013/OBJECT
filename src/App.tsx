@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, createMemoryRouter, RouterProvider } from 'react-router'
 import Landing from './pages/Landing'
 
 const DemoShowroom = lazy(() => import('./pages/DemoShowroom'))
@@ -13,7 +13,10 @@ function Loading() {
 
 const s = (el: React.ReactNode) => <Suspense fallback={<Loading />}>{el}</Suspense>
 
-const router = createBrowserRouter([
+// Sandboxed previews have no real URL to route on, so they keep history in memory.
+const createRouter = import.meta.env.VITE_MEMORY_ROUTER ? createMemoryRouter : createBrowserRouter
+
+const router = createRouter([
   { path: '/', element: <Landing /> },
   { path: '/demo/:slug', element: s(<DemoShowroom />) },
   { path: '/create', element: s(<Create />) },

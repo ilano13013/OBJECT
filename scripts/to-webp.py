@@ -1,4 +1,4 @@
-"""Convert rendered PNGs to WebP for public/renders. Usage: python3 scripts/to-webp.py <png-dir> public/renders"""
+"""Convert rendered PNGs to WebP for src/assets/renders. Usage: python3 scripts/to-webp.py <png-dir> src/assets/renders"""
 import pathlib, sys
 from PIL import Image
 
