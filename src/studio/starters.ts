@@ -51,3 +51,24 @@ export function createStarterConfig(template: TemplateId, mode: MediaMode, produ
     backdrops: gallery ? ['#d9d5cd', '#1d1d20', '#b9bcc0', '#e8dccb'] : undefined,
   }
 }
+
+/**
+ * Fills any field missing from a stored config (older drafts, partial rows)
+ * so the editor and templates can rely on the full shape.
+ */
+export function withDefaults(stored: Partial<ShowroomConfig> | null | undefined, fallback: { template: TemplateId; slug: string }): ShowroomConfig {
+  const template = (stored?.template ?? fallback.template) as TemplateId
+  const base = createStarterConfig(template, stored?.mode ?? 'photo', stored?.productName ?? '', stored?.slug ?? fallback.slug)
+  return {
+    ...base,
+    ...stored,
+    template,
+    theme: { ...base.theme, ...(stored?.theme ?? {}) },
+    animation: { ...base.animation, ...(stored?.animation ?? {}) },
+    images: stored?.images ?? [],
+    features: stored?.features ?? [],
+    chapters: stored?.chapters ?? base.chapters,
+    details: stored?.details ?? [],
+    isDemo: false,
+  }
+}

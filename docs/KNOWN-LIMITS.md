@@ -1,13 +1,21 @@
-# Known limits (end of Phase B)
+# Known limits (end of Phase C)
 
 ## Not built yet
-- **Accounts, database, cloud storage, payments, quotas, statistics**
-  (Phases C–D). No checkout exists and nothing can be bought.
-- **Local mode.** Showrooms live in the browser that created them
-  (localStorage for content, IndexedDB for files). A published `/s/:slug`
-  link only works on that device until Phase C moves storage to Supabase.
-  Clearing site data deletes them. Private browsing may block storage; the
-  studio says so.
+- **Payments** (Phase D): no checkout, no billing portal, nothing can be
+  bought. In cloud mode publishing needs a slot granted in SQL
+  (`workspaces.bonus_publish_slots`); see docs/SUPABASE.md.
+- **Not yet connected to a real Supabase project.** The schema, policies and
+  cloud flows were tested on PostgreSQL 16 with Supabase Auth (GoTrue),
+  PostgREST and Supabase Storage run locally, not on supabase.com.
+- **Local mode** (no Supabase variables, and the claude.ai preview):
+  showrooms live in the browser that created them; links work on that device
+  only; statistics show example data, labelled as such.
+- **Account deletion** is not self-service yet (needs a server function with
+  the service role).
+- Orphaned files: if a browser closes between a file upload and its database
+  record, the file can stay in storage. A periodic clean-up job is planned.
+- Rate limiting relies on Supabase defaults (auth) and visit de-duplication;
+  no extra per-IP limits yet.
 - Uploaded models: GLB or self-contained glTF up to 50 MB; Meshopt
   compression works, **Draco and KTX2 textures are not supported yet**.
 - Hotspot positions are set with Height / Around sliders, not by clicking on

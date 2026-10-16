@@ -5,12 +5,19 @@
 OBJECT. lets independent brands turn a product into an interactive showroom:
 upload, design, publish a shareable link. No code.
 
-> **Status: Phases A (Visual Experience) and B (Product Builder) complete.**
-> The landing page, three demo showrooms and a working showroom editor are
-> live code. The studio runs in **local mode**: showrooms and files are
-> stored in the browser (localStorage + IndexedDB), so a published link
-> works on the device that published it. Accounts, the database and
-> payments (Phases C–D) are next. Nothing can be purchased.
+> **Status: Phases A, B and C complete.** Landing page, three demo
+> showrooms, the showroom editor, and the SaaS foundation: accounts,
+> Supabase schema with row-level security, cloud file storage, public
+> links, statistics.
+>
+> Two modes, chosen at build time:
+> - **Cloud** when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set:
+>   sign-up / sign-in, data in Supabase, links work everywhere.
+>   Setup guide: [`docs/SUPABASE.md`](docs/SUPABASE.md).
+> - **Local** otherwise: no accounts, showrooms stored in this browser.
+>
+> Payments (Phase D) are next. Nothing can be purchased; publishing in cloud
+> mode needs a slot granted by an operator until Stripe is connected.
 
 ## Routes
 
@@ -24,6 +31,9 @@ upload, design, publish a shareable link. No code.
 | `/studio/new` | Onboarding: template → photos or 3D model → product name |
 | `/studio/:id` | Editor: settings on the left, live preview (desktop / phone), save status, publish |
 | `/studio/:id/preview` | Full-screen preview of the draft |
+| `/studio/:id/stats` | Views, visitors, purchase clicks, click rate over 7 / 30 days |
+| `/account` | Profile, studio name, plan and publishing slots, sign out |
+| `/login`, `/auth/callback`, `/auth/reset` | Sign in / create account / email links / password reset (cloud mode) |
 | `/s/:slug` | The published, read-only showroom |
 
 AURA, FORM and MONO are fictional brands, modelled procedurally in Three.js.
@@ -32,9 +42,9 @@ They are labelled as such on every page.
 ## Stack
 
 React 19 · TypeScript · Vite · Tailwind CSS v4 · GSAP + ScrollTrigger ·
-Three.js · React Three Fiber · Drei · Vitest · Playwright · ESLint.
-Planned: Supabase (Postgres, Auth, Storage) and Stripe (Checkout, Billing,
-Customer Portal), hosted on Vercel.
+Three.js · React Three Fiber · Drei · Supabase (Postgres + RLS, Auth,
+Storage) · Vitest · Playwright · ESLint. Planned: Stripe (Checkout, Billing,
+Customer Portal). Hosted on Vercel.
 
 ## Run it
 
@@ -51,7 +61,9 @@ npm run preview      # serve dist/ on :4173
 npm run typecheck    # tsc -b
 npm run lint         # eslint
 npm test             # vitest (unit)
-npm run test:e2e     # playwright: desktop + iPhone 13 viewport
+npm run test:e2e     # playwright: desktop + iPhone 13 viewport (local mode)
+supabase/tests/run.sh                                   # SQL security tests (needs PostgreSQL)
+npx playwright test -c playwright.cloud.config.ts      # cloud-mode e2e (needs a Supabase-compatible stack)
 ```
 
 Playwright uses the system Chromium at `/opt/pw-browsers/chromium` when it
@@ -74,4 +86,5 @@ python3 scripts/to-webp.py /tmp/renders src/assets/renders
 - [`DESIGN.md`](DESIGN.md): design system, motion, 3D and honesty rules
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): code layout and the plan for phases B–E
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): putting it online (Vercel)
+- [`docs/SUPABASE.md`](docs/SUPABASE.md): connecting Supabase (French)
 - [`docs/KNOWN-LIMITS.md`](docs/KNOWN-LIMITS.md): what is not done yet

@@ -1,9 +1,10 @@
-import { Copy, ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
+import { BarChart3, Copy, ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { fontClass } from '@/showroom/parts'
 import { assetIdOf, assetUrl, isAssetRef } from '@/studio/assets'
-import { repository, useShowrooms } from '@/studio/repository'
+import { backend, type Entitlement } from '@/studio/backend'
+import { refreshShowrooms, useShowroomsState } from '@/studio/store'
 import { TEMPLATE_INFO } from '@/studio/starters'
 import type { StudioShowroom } from '@/studio/types'
 import { StudioShell } from './StudioShell'
@@ -35,14 +36,32 @@ function Thumb({ s }: { s: StudioShowroom }) {
 }
 
 export default function StudioHome() {
-  const showrooms = useShowrooms()
+  const { showrooms, loaded, error } = useShowroomsState()
   const navigate = useNavigate()
   const [confirm, setConfirm] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'draft' | 'published'>('all')
+  const [busy, setBusy] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [views, setViews] = useState<Record<string, { views: number; clicks: number }> | null>(null)
+  const [plan, setPlan] = useState<Entitlement | null>(null)
 
   useEffect(() => {
     document.title = 'My showrooms · OBJECT.'
-  }, [])
+    backend.totals(30).then(setViews).catch(() => setViews(null))
+    backend.entitlement().then(setPlan).catch(() => setPlan(null))
+  }, [showrooms.length])
+
+  async function act(id: string, run: () => Promise<void>) {
+    setBusy(id)
+    setActionError(null)
+    try {
+      await run()
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'That didn’t work. Try again.')
+    } finally {
+      setBusy(null)
+    }
+  }
 
   const list = showrooms.filter((s) => filter === 'all' || s.status === filter)
   const counts = { all: showrooms.length, draft: showrooms.filter((s) => s.status === 'draft').length, published: showrooms.filter((s) => s.status === 'published').length }
@@ -76,7 +95,34 @@ export default function StudioHome() {
           )}
         </div>
 
-        {showrooms.length === 0 ? (
+        {plan && (
+          <p className="mt-6 text-sm text-silver">
+            Plan: <span className="text-porcelain">{plan.plan === 'none' ? 'none yet' : plan.plan === 'one' ? 'One Showroom' : 'Studio'}</span> ·{' '}
+            <span className="tabular-nums">
+              {plan.used} of {plan.allowance} publishing slot{plan.allowance === 1 ? '' : 's'} used
+            </span>{' '}
+            · <Link to="/account" className="underline underline-offset-4">Account</Link>
+          </p>
+        )}
+        {actionError && (
+          <p role="alert" className="mt-6 text-sm text-[#ff9d8f]">
+            {actionError}
+          </p>
+        )}
+
+        {!loaded ? (
+          <p className="mt-16 text-sm text-ash" aria-busy="true">
+            Loading your showrooms…
+          </p>
+        ) : error ? (
+          <div className="mt-16 grid max-w-lg gap-4">
+            <p className="text-lg">Your showrooms couldn’t be loaded.</p>
+            <p className="text-sm text-ash">{error}</p>
+            <button type="button" onClick={() => void refreshShowrooms()} className="min-h-11 w-fit cursor-pointer rounded-full bg-lime px-5 text-sm font-semibold text-obsidian">
+              Try again
+            </button>
+          </div>
+        ) : showrooms.length === 0 ? (
           <div className="mt-16 grid max-w-xl gap-6">
             <p className="text-lg leading-relaxed text-silver">
               No showrooms yet. Start with your product’s photos or a 3D model: the first one takes about ten minutes.
@@ -104,6 +150,9 @@ export default function StudioHome() {
                     <p className="text-[13px] text-ash">
                       {TEMPLATE_INFO[s.draft.template].name} · created {dateFmt.format(new Date(s.createdAt))}
                     </p>
+                    <p className="text-[13px] tabular-nums text-ash">
+                      {views ? `${views[s.id]?.views ?? 0} views · 30 days` : 'Views recorded once accounts are on'}
+                    </p>
                   </div>
                   <span className={`meta shrink-0 rounded-full px-2.5 py-1 ${s.status === 'published' ? 'bg-[#3ccf6e]/15 text-[#7fe3a1]' : 'bg-white/5 text-silver'}`}>
                     {s.status === 'published' ? 'Live' : 'Draft'}
@@ -118,16 +167,20 @@ export default function StudioHome() {
                       <ExternalLink aria-hidden className="size-4" /> View
                     </Link>
                   )}
+                  <Link to={`/studio/${s.id}/stats`} className="inline-flex min-h-10 items-center gap-1.5 rounded-md px-2.5 text-silver hover:bg-white/5 hover:text-porcelain">
+                    <BarChart3 aria-hidden className="size-4" /> Stats
+                  </Link>
                   <button
                     type="button"
-                    onClick={async () => navigate(`/studio/${(await repository.duplicate(s.id)).id}`)}
-                    className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-silver hover:bg-white/5 hover:text-porcelain"
+                    disabled={busy === s.id}
+                    onClick={() => act(s.id, async () => navigate(`/studio/${(await backend.duplicate(s.id)).id}`))}
+                    className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-silver hover:bg-white/5 hover:text-porcelain disabled:cursor-wait disabled:opacity-60"
                   >
-                    <Copy aria-hidden className="size-4" /> Duplicate
+                    <Copy aria-hidden className="size-4" /> {busy === s.id ? 'Working…' : 'Duplicate'}
                   </button>
                   {confirm === s.id ? (
                     <span className="ml-auto inline-flex items-center gap-1">
-                      <button type="button" onClick={() => repository.remove(s.id)} className="min-h-10 cursor-pointer rounded-md bg-[#ff9d8f] px-3 font-semibold text-obsidian">
+                      <button type="button" disabled={busy === s.id} onClick={() => act(s.id, () => backend.remove(s.id))} className="min-h-10 cursor-pointer rounded-md bg-[#ff9d8f] px-3 font-semibold text-obsidian">
                         Delete
                       </button>
                       <button type="button" onClick={() => setConfirm(null)} className="min-h-10 cursor-pointer px-2 text-ash hover:text-porcelain">

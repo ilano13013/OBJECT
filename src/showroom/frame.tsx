@@ -5,6 +5,8 @@ export interface ShowroomEnv {
   scroller: HTMLElement | null
   /** True when the showroom is rendered narrower than 768px. */
   narrow: boolean
+  /** Called when a visitor follows the purchase link (statistics). */
+  onPurchase?: () => void
 }
 
 const EnvContext = createContext<ShowroomEnv>({ scroller: null, narrow: false })
@@ -22,7 +24,7 @@ export function useShowroomEnv() {
  * - `scroller` omitted: the page scrolls (public pages, demos); 1 vh = 1svh.
  * - `scroller` given: the frame fills that element; 1 vh = its height / 100.
  */
-export function ShowroomFrame({ children, scroller = null }: { children: ReactNode; scroller?: HTMLElement | null }) {
+export function ShowroomFrame({ children, scroller = null, onPurchase }: { children: ReactNode; scroller?: HTMLElement | null; onPurchase?: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState<{ w: number; h: number } | null>(null)
 
@@ -42,7 +44,7 @@ export function ShowroomFrame({ children, scroller = null }: { children: ReactNo
   const narrow = (size?.w ?? (typeof window !== 'undefined' ? window.innerWidth : 1024)) < 768
 
   return (
-    <EnvContext.Provider value={{ scroller, narrow }}>
+    <EnvContext.Provider value={{ scroller, narrow, onPurchase }}>
       <div ref={ref} className="@container relative w-full" style={style}>
         {children}
       </div>

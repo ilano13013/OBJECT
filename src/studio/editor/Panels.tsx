@@ -3,9 +3,9 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { contrastRatio } from '@/lib/color'
 import { safeExternalUrl, slugify } from '@/lib/url'
 import type { FontId, ShowroomChapter, ShowroomConfig, ShowroomFeature, TemplateId } from '@/showroom/types'
-import { assetIdOf, assetRef, assetUrl, deleteAsset, isAssetRef, putAsset } from '../assets'
+import { assetIdOf, assetRef, assetUrl, forgetAsset, isAssetRef } from '../assets'
+import { backend } from '../backend'
 import { newId } from '../ids'
-import { repository } from '../repository'
 import { TEMPLATE_INFO } from '../starters'
 import { DEFAULT_PRESET, presetTheme, THEME_PRESETS } from '../themes'
 import type { StudioShowroom } from '../types'
@@ -24,6 +24,11 @@ const set =
   <K extends keyof ShowroomConfig>(update: Update, key: K) =>
   (value: ShowroomConfig[K]) =>
     update((d) => ({ ...d, [key]: value }))
+
+function deleteAsset(key: string) {
+  forgetAsset(key)
+  return backend.deleteAsset(key)
+}
 
 /** Assets still referenced by the live (published) version must survive draft edits. */
 function usedByPublished(showroom: StudioShowroom, assetId: string) {
@@ -135,8 +140,8 @@ export function MediaPanel({ showroom, draft, update }: PanelProps) {
         continue
       }
       try {
-        const meta = await putAsset(showroom.id, 'image', file, file.name, check.mime)
-        added.push({ src: assetRef(meta.id), alt: '' })
+        const key = await backend.putAsset(showroom.id, 'image', file, file.name, check.mime)
+        added.push({ src: assetRef(key), alt: '' })
       } catch (e) {
         problems.push(e instanceof Error ? e.message : 'Couldn’t store this file.')
       }
@@ -156,9 +161,9 @@ export function MediaPanel({ showroom, draft, update }: PanelProps) {
       return
     }
     try {
-      const meta = await putAsset(showroom.id, 'model', file, file.name, check.mime)
+      const key = await backend.putAsset(showroom.id, 'model', file, file.name, check.mime)
       const previous = draft.model
-      update((d) => ({ ...d, model: { kind: 'upload', assetId: meta.id, name: file.name } }))
+      update((d) => ({ ...d, model: { kind: 'upload', assetId: key, name: file.name } }))
       if (previous?.kind === 'upload' && !usedByPublished(showroom, previous.assetId)) deleteAsset(previous.assetId).catch(() => undefined)
       setErrors([])
     } catch (e) {
@@ -603,6 +608,7 @@ export function LinkPanel({ showroom }: PanelProps) {
   const [value, setValue] = useState(showroom.slug)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [busy, setBusy] = useState(false)
   const normalised = slugify(value)
   return (
     <Section id="link" title="Public link" summary={`/s/${showroom.slug}`}>
@@ -624,16 +630,18 @@ export function LinkPanel({ showroom }: PanelProps) {
         }
       />
       <SmallButton
-        disabled={normalised === showroom.slug}
-        onClick={() => {
-          const r = repository.setSlug(showroom.id, value)
+        disabled={normalised === showroom.slug || busy}
+        onClick={async () => {
+          setBusy(true)
+          const r = await backend.setSlug(showroom.id, value)
+          setBusy(false)
           if (r.ok) {
-            setValue(slugify(value))
+            setValue(r.slug)
             setSaved(true)
           } else setError(r.error)
         }}
       >
-        {saved ? 'Address saved' : 'Save address'}
+        {busy ? 'Saving…' : saved ? 'Address saved' : 'Save address'}
       </SmallButton>
     </Section>
   )

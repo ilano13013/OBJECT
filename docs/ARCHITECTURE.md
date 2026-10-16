@@ -68,14 +68,36 @@ src/
   with copy link, unpublish confirmation, delete. Phones get Edit/Preview
   tabs and collapsible sections.
 
-### Phase C: SaaS foundation (Supabase)
-Tables: `profiles`, `workspaces`, `showrooms`, `showroom_content`
-(`settings_json` = `ShowroomConfig` minus identity fields), `assets`,
-`subscriptions`, `orders`, `showroom_analytics`. RLS: owners via
-`workspaces.owner_id = auth.uid()`; anonymous `select` only on
-`status = 'published'` showrooms and their content/assets. Storage bucket per
-workspace prefix, MIME + size checks in a server function. Public route
-`/s/:slug`.
+### Phase C: SaaS foundation (done)
+- **Schema** `supabase/migrations/20261016000100_init.sql`: `profiles`,
+  `workspaces`, `showrooms`, `showroom_content` (`settings_json` = draft
+  `ShowroomConfig`, `published_json` = live snapshot), `assets`,
+  `subscriptions`, `orders`, `showroom_analytics`; constraints and indexes.
+- **Security**: RLS on every table; **column privileges** decide what the
+  browser may write (status, publication, quotas, billing and analytics are
+  never client-writable). Lifecycle through `SECURITY DEFINER` functions:
+  `create_showroom`, `save_draft` (derives columns server-side),
+  `set_showroom_slug`, `publish_showroom` (validation + **server-side
+  quota** via `can_publish` / `publish_entitlement`), `unpublish_showroom`,
+  `get_published_showroom` (the only public read), `track_event`,
+  `showroom_stats`, `workspace_view_totals`. Storage: private bucket,
+  owner-only writes under `<workspace>/…`, public read only of files the
+  published snapshot references.
+- **Front end**: `StudioBackend` interface (`src/studio/backend/`) with
+  `LocalBackend` and `CloudBackend`; selected at build time by the presence
+  of `VITE_SUPABASE_*`. A small store (`src/studio/store.ts`) holds the list.
+  Asset keys are IndexedDB ids locally and storage paths in the cloud, so
+  visitors fetch published files without reading private tables.
+- **Auth**: `AuthProvider` + `RequireAuth` (studio routes), sign-in /
+  sign-up / magic link / reset, PKCE, same-site-only redirects.
+- **Reliability**: saves are serialised; every edit is also backed up
+  synchronously in localStorage and offered for restore if a save never
+  landed.
+- **Statistics**: views, approximate unique visitors (random per-session id,
+  no cookies/IP), purchase clicks, click rate, 7/30-day chart and table.
+  Local mode shows clearly labelled example data.
+- **Tests**: SQL security suite (`supabase/tests`), cloud e2e
+  (`e2e-cloud`) against Auth + PostgREST + Storage.
 
 ### Phase D: Monetisation (Stripe test mode)
 Vercel functions: `create-checkout-session` (One: payment, Studio:

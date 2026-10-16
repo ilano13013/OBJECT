@@ -17,7 +17,9 @@ import {
   TemplatePanel,
   type Update,
 } from '@/studio/editor/Panels'
-import { repository, StorageError, useShowroom } from '@/studio/repository'
+import { backend } from '@/studio/backend'
+import { clearBackup, readBackup, writeBackup } from '@/studio/draftBackup'
+import { refreshShowrooms, useShowroom } from '@/studio/store'
 import type { StudioShowroom } from '@/studio/types'
 import { useResolvedConfig } from '@/studio/useResolvedConfig'
 import type { PublishIssue } from '@/studio/validation'
@@ -28,68 +30,106 @@ type SaveState = { kind: 'saved' } | { kind: 'saving' } | { kind: 'error'; messa
 
 export default function Editor() {
   const { id } = useParams()
-  const showroom = useShowroom(id)
-  if (!showroom) return <NotFound />
+  const { showroom, loaded, error } = useShowroom(id)
+  if (!showroom) {
+    if (!loaded) return <div className="grid min-h-[100dvh] place-items-center bg-obsidian text-sm text-ash" aria-busy="true">Opening your showroom…</div>
+    if (error) return <LoadError message={error} />
+    return <NotFound />
+  }
   return <EditorInner key={showroom.id} showroom={showroom} />
+}
+
+function LoadError({ message }: { message: string }) {
+  return (
+    <main className="gutter grid min-h-[100dvh] content-center gap-6 bg-obsidian">
+      <p className="max-w-md text-lg text-porcelain">Your showroom couldn’t be loaded.</p>
+      <p className="max-w-md text-sm text-ash">{message}</p>
+      <div className="flex gap-3">
+        <button type="button" onClick={() => void refreshShowrooms()} className="min-h-11 cursor-pointer rounded-full bg-lime px-5 text-sm font-semibold text-obsidian">
+          Try again
+        </button>
+        <Link to="/studio" className="inline-flex min-h-11 items-center rounded-full px-5 text-sm ring-1 ring-inset ring-silver/30">
+          My showrooms
+        </Link>
+      </div>
+    </main>
+  )
 }
 
 function EditorInner({ showroom }: { showroom: StudioShowroom }) {
   const navigate = useNavigate()
+  const [backup] = useState(() => readBackup(showroom.id, showroom.updatedAt))
   const [draft, setDraft] = useState<ShowroomConfig>(showroom.draft)
   const [save, setSave] = useState<SaveState>({ kind: 'saved' })
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [tab, setTab] = useState<'edit' | 'preview'>('edit')
   const [replay, setReplay] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [showRestore, setShowRestore] = useState(!!backup)
   const [dialog, setDialog] = useState<null | { kind: 'issues'; issues: PublishIssue[] } | { kind: 'live' }>(null)
   const timer = useRef<number | undefined>(undefined)
   const latest = useRef(draft)
   const dirty = useRef(false)
+  const chain = useRef<Promise<boolean>>(Promise.resolve(true))
 
-  const flush = useCallback(() => {
+  /** Saves the latest draft. Saves run one after another so an older one never overwrites a newer one. */
+  const flush = useCallback((): Promise<boolean> => {
     window.clearTimeout(timer.current)
-    if (!dirty.current) return true
-    try {
-      repository.saveDraft(showroom.id, latest.current)
-      dirty.current = false
-      setSave({ kind: 'saved' })
-      return true
-    } catch (e) {
-      setSave({ kind: 'error', message: e instanceof StorageError ? e.message : 'Couldn’t save your changes. Try again.' })
-      return false
-    }
+    if (!dirty.current) return chain.current
+    dirty.current = false
+    const snapshot = latest.current
+    chain.current = chain.current.then(async () => {
+      try {
+        await backend.saveDraft(showroom.id, snapshot)
+        if (!dirty.current) {
+          clearBackup(showroom.id)
+          setSave({ kind: 'saved' })
+        }
+        return true
+      } catch (e) {
+        dirty.current = true
+        setSave({ kind: 'error', message: e instanceof Error ? e.message : 'Couldn’t save your changes. Try again.' })
+        return false
+      }
+    })
+    return chain.current
   }, [showroom.id])
 
-  const update: Update = useCallback(
-    (change) => {
-      setDraft((d) => change(d))
-    },
-    [],
-  )
+  const update: Update = useCallback((change) => {
+    setDraft((d) => change(d))
+    // Same render as the change: the status never claims "Saved" while an edit is pending.
+    setSave({ kind: 'saving' })
+  }, [])
 
-  // Autosave half a second after the last change.
+  // Autosave half a second after the last change; a local backup is written at once.
   useEffect(() => {
     if (draft === latest.current) return
     latest.current = draft
     dirty.current = true
+    writeBackup(showroom.id, draft)
     setSave({ kind: 'saving' })
     window.clearTimeout(timer.current)
-    timer.current = window.setTimeout(flush, 500)
-  }, [draft, flush])
+    timer.current = window.setTimeout(() => void flush(), 500)
+  }, [draft, flush, showroom.id])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
         e.preventDefault()
-        flush()
+        void flush()
       }
     }
-    const onLeave = () => flush()
+    const onLeave = (e: BeforeUnloadEvent) => {
+      if (!dirty.current) return
+      void flush()
+      e.preventDefault()
+    }
     window.addEventListener('keydown', onKey)
     window.addEventListener('beforeunload', onLeave)
     return () => {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('beforeunload', onLeave)
-      flush()
+      void flush()
     }
   }, [flush])
 
@@ -97,12 +137,20 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
     document.title = `${draft.productName || 'Untitled'} · Studio · OBJECT.`
   }, [draft.productName])
 
-  const changedSincePublish = showroom.status === 'published' && JSON.stringify({ ...draft, slug: '' }) !== JSON.stringify({ ...showroom.published, slug: '' })
+  const changedSincePublish =
+    showroom.status === 'published' && JSON.stringify({ ...draft, slug: '' }) !== JSON.stringify({ ...showroom.published, slug: '' })
 
-  function publish() {
-    if (!flush()) return
-    const result = repository.publish(showroom.id)
-    setDialog(result.ok ? { kind: 'live' } : { kind: 'issues', issues: result.issues })
+  async function publish() {
+    setBusy(true)
+    try {
+      if (!(await flush())) return
+      const result = await backend.publish(showroom.id)
+      setDialog(result.ok ? { kind: 'live' } : { kind: 'issues', issues: result.issues })
+    } catch (e) {
+      setDialog({ kind: 'issues', issues: [{ field: 'server', message: e instanceof Error ? e.message : 'Publishing failed. Try again.' }] })
+    } finally {
+      setBusy(false)
+    }
   }
 
   const panelProps = { showroom, draft, update }
@@ -111,7 +159,7 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
     <div className="flex h-[100dvh] flex-col bg-obsidian text-porcelain">
       {/* Top bar */}
       <header className="flex h-16 shrink-0 items-center gap-2 border-b border-hairline px-3 md:gap-4 md:px-5">
-        <Link to="/studio" onClick={flush} className="grid size-11 shrink-0 place-items-center rounded-md text-silver hover:bg-white/5 hover:text-porcelain" aria-label="Back to my showrooms">
+        <Link to="/studio" onClick={() => void flush()} className="grid size-11 shrink-0 place-items-center rounded-md text-silver hover:bg-white/5 hover:text-porcelain" aria-label="Back to my showrooms">
           <ArrowLeft aria-hidden className="size-5" />
         </Link>
         <div className="min-w-0 flex-1">
@@ -145,11 +193,45 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
             <span className="size-2 rounded-full bg-[#3ccf6e]" aria-hidden /> Live
           </button>
         ) : (
-          <button type="button" onClick={publish} className="inline-flex min-h-11 cursor-pointer items-center rounded-full bg-lime px-5 text-sm font-semibold text-obsidian hover:shadow-[0_8px_30px_-8px_rgb(215_255_67/0.6)]">
+          <button
+            type="button"
+            onClick={() => void publish()}
+            disabled={busy}
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-lime px-5 text-sm font-semibold text-obsidian hover:shadow-[0_8px_30px_-8px_rgb(215_255_67/0.6)] disabled:cursor-wait disabled:opacity-70"
+          >
+            {busy && <LoaderCircle aria-hidden className="size-4 animate-spin" />}
             {showroom.status === 'published' ? 'Publish changes' : 'Publish'}
           </button>
         )}
       </header>
+
+      {showRestore && backup && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-graphite px-4 py-3 text-sm">
+          <span>You have changes from {new Date(backup.savedAt).toLocaleString()} that weren’t saved.</span>
+          <span className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDraft(backup.draft)
+                setShowRestore(false)
+              }}
+              className="min-h-10 cursor-pointer rounded-full bg-lime px-4 font-semibold text-obsidian"
+            >
+              Restore them
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearBackup(showroom.id)
+                setShowRestore(false)
+              }}
+              className="min-h-10 cursor-pointer px-3 text-ash hover:text-porcelain"
+            >
+              Discard
+            </button>
+          </span>
+        </div>
+      )}
 
       {/* Mobile tabs */}
       <div role="tablist" aria-label="Editor view" className="grid grid-cols-2 border-b border-hairline lg:hidden">
@@ -196,9 +278,9 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
             <IssuesBody issues={dialog.issues} onClose={() => setDialog(null)} />
           ) : (
             <LiveBody
-              showroom={repository.get(showroom.id) ?? showroom}
-              onUnpublish={() => {
-                repository.unpublish(showroom.id)
+              showroom={showroom}
+              onUnpublish={async () => {
+                await backend.unpublish(showroom.id)
                 setDialog(null)
               }}
             />
@@ -380,7 +462,7 @@ function IssuesBody({ issues, onClose }: { issues: PublishIssue[]; onClose: () =
   )
 }
 
-function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpublish: () => void }) {
+function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpublish: () => Promise<void> }) {
   const url = publicUrl(showroom.slug)
   const [copied, setCopied] = useState<'idle' | 'copied' | 'failed'>('idle')
   const [confirm, setConfirm] = useState(false)
@@ -423,7 +505,7 @@ function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpub
         {confirm ? (
           <span className="flex items-center gap-2 text-sm">
             Take it offline?
-            <button type="button" onClick={onUnpublish} className="min-h-11 cursor-pointer rounded-full bg-[#ff9d8f] px-4 font-semibold text-obsidian">
+            <button type="button" onClick={() => void onUnpublish()} className="min-h-11 cursor-pointer rounded-full bg-[#ff9d8f] px-4 font-semibold text-obsidian">
               Unpublish
             </button>
             <button type="button" onClick={() => setConfirm(false)} className="min-h-11 cursor-pointer px-2 text-ash hover:text-porcelain">
@@ -442,14 +524,35 @@ function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpub
 
 function DangerZone({ showroom, onDeleted }: { showroom: StudioShowroom; onDeleted: () => void }) {
   const [confirm, setConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   return (
     <div className="p-5">
       {confirm ? (
         <div className="space-y-3 rounded-lg p-4 ring-1 ring-inset ring-[#ff9d8f]/40">
           <p className="text-sm">Delete “{showroom.draft.productName || 'Untitled'}” and its files? {showroom.status === 'published' && 'Its public link stops working.'} This can’t be undone.</p>
+          {deleteError && (
+            <p role="alert" className="text-sm text-[#ff9d8f]">
+              {deleteError}
+            </p>
+          )}
           <div className="flex gap-2">
-            <button type="button" onClick={() => repository.remove(showroom.id).then(onDeleted)} className="min-h-11 cursor-pointer rounded-full bg-[#ff9d8f] px-4 text-sm font-semibold text-obsidian">
-              Delete showroom
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={async () => {
+                setDeleting(true)
+                try {
+                  await backend.remove(showroom.id)
+                  onDeleted()
+                } catch (e) {
+                  setDeleteError(e instanceof Error ? e.message : 'Couldn’t delete this showroom.')
+                  setDeleting(false)
+                }
+              }}
+              className="min-h-11 cursor-pointer rounded-full bg-[#ff9d8f] px-4 text-sm font-semibold text-obsidian disabled:cursor-wait disabled:opacity-70"
+            >
+              {deleting ? 'Deleting…' : 'Delete showroom'}
             </button>
             <button type="button" onClick={() => setConfirm(false)} className="min-h-11 cursor-pointer px-3 text-sm text-ash hover:text-porcelain">
               Keep it

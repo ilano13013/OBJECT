@@ -1,16 +1,16 @@
-import { useSyncExternalStore } from 'react'
 import { slugify } from '@/lib/url'
 import type { MediaMode, ShowroomConfig, TemplateId } from '@/showroom/types'
-import { assetIdOf, assetRef, copyAssets, deleteShowroomAssets, isAssetRef } from './assets'
+import { copyAssets, deleteShowroomAssets } from './assets-idb'
+import { assetIdOf, assetRef, isAssetRef } from './refs'
 import { newId } from './ids'
 import { createStarterConfig } from './starters'
 import type { StudioShowroom } from './types'
 import { publishIssues, type PublishIssue } from './validation'
 
 /**
- * Where showrooms are kept. Phase B ships a local (this-browser) store;
- * Phase C implements the same interface on Supabase with RLS, so the editor
- * and pages do not change.
+ * Local (this-browser) showroom store. Synchronous and fully unit-tested;
+ * wrapped by backend/local.ts behind the async StudioBackend interface that
+ * the cloud (Supabase) backend also implements.
  */
 export interface ShowroomRepository {
   list(): StudioShowroom[]
@@ -210,20 +210,5 @@ function safeLocalStorage(): Storage | null {
   }
 }
 
-export const repository: ShowroomRepository = new LocalShowroomRepository()
-
 /** True when showrooms can be kept in this browser. */
 export const storageAvailable = () => safeLocalStorage() !== null
-
-export function useShowrooms(): StudioShowroom[] {
-  return useSyncExternalStore(
-    (l) => repository.subscribe(l),
-    () => repository.list(),
-    () => [],
-  )
-}
-
-export function useShowroom(id: string | undefined): StudioShowroom | undefined {
-  const all = useShowrooms()
-  return id ? all.find((s) => s.id === id) : undefined
-}

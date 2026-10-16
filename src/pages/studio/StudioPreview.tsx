@@ -4,14 +4,14 @@ import { Link, useParams } from 'react-router'
 import { bindPointer } from '@/lib/pointer'
 import { ShowroomFrame } from '@/showroom/frame'
 import { ShowroomRenderer } from '@/showroom/ShowroomRenderer'
-import { useShowroom } from '@/studio/repository'
+import { useShowroom } from '@/studio/store'
 import { useResolvedConfig } from '@/studio/useResolvedConfig'
 import NotFound from '../NotFound'
 
 export default function StudioPreview() {
   const { id } = useParams()
-  const showroom = useShowroom(id)
-  if (!showroom) return <NotFound />
+  const { showroom, loaded } = useShowroom(id)
+  if (!showroom) return loaded ? <NotFound /> : <div className="min-h-[100dvh] bg-obsidian" aria-busy="true" />
   return <Inner id={showroom.id} config={showroom.draft} />
 }
 

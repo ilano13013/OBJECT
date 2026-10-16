@@ -5,7 +5,7 @@ import auraPoster from '@/assets/renders/aura-poster.webp'
 import formHero from '@/assets/renders/form-hero.webp'
 import monoPoster from '@/assets/renders/mono-poster.webp'
 import type { MediaMode, TemplateId } from '@/showroom/types'
-import { repository, StorageError } from '@/studio/repository'
+import { backend } from '@/studio/backend'
 import { TEMPLATE_INFO } from '@/studio/starters'
 import { inputClass } from '@/studio/ui'
 import { StudioShell } from './StudioShell'
@@ -22,19 +22,22 @@ export default function NewShowroom() {
   const [mode, setMode] = useState<MediaMode>('true3d')
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
 
   useEffect(() => {
     document.title = 'New showroom · OBJECT.'
   }, [])
 
-  function create(e: React.FormEvent) {
+  async function create(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return setError('Give your product a name. You can change it later.')
+    setPending(true)
     try {
-      const s = repository.create({ template, mode, productName: name })
+      const s = await backend.create({ template, mode, productName: name })
       navigate(`/studio/${s.id}`)
     } catch (err) {
-      setError(err instanceof StorageError ? err.message : 'Couldn’t create the showroom. Try again.')
+      setError(err instanceof Error ? err.message : 'Couldn’t create the showroom. Try again.')
+      setPending(false)
     }
   }
 
@@ -141,8 +144,12 @@ export default function NewShowroom() {
           </fieldset>
 
           <div>
-            <button type="submit" className="inline-flex min-h-13 cursor-pointer items-center gap-3 rounded-full bg-lime px-7 text-base font-semibold text-obsidian hover:shadow-[0_10px_40px_-8px_rgb(215_255_67/0.55)]">
-              Create and open the editor <ArrowRight aria-hidden className="size-4" />
+            <button
+              type="submit"
+              disabled={pending}
+              className="inline-flex min-h-13 cursor-pointer items-center gap-3 rounded-full bg-lime px-7 text-base font-semibold text-obsidian hover:shadow-[0_10px_40px_-8px_rgb(215_255_67/0.55)] disabled:cursor-wait disabled:opacity-70"
+            >
+              {pending ? 'Creating…' : 'Create and open the editor'} <ArrowRight aria-hidden className="size-4" />
             </button>
           </div>
         </form>

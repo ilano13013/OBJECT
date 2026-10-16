@@ -2,6 +2,7 @@ import { ArrowUpRight, Box, Images, Info } from 'lucide-react'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { safeExternalUrl } from '@/lib/url'
 import { useReducedMotion } from '@/lib/useReducedMotion'
+import { useShowroomEnv } from './frame'
 import type { FontId, MediaMode, ShowroomConfig, ShowroomImage } from './types'
 
 export function fontClass(id: FontId) {
@@ -74,6 +75,7 @@ export function PurchaseButton({
   onClick?: () => void
 }) {
   const [explained, setExplained] = useState(false)
+  const { onPurchase } = useShowroomEnv()
   const href = safeExternalUrl(config.purchaseUrl)
   const cls = `group inline-flex min-h-13 items-center justify-center gap-3 rounded-full px-7 py-3.5 text-base font-semibold tracking-tight transition-[transform,filter] duration-300 ease-out-expo hover:brightness-110 active:scale-[0.98] cursor-pointer ${className}`
   const style = { backgroundColor: 'var(--sr-accent)', color: 'var(--sr-on-accent)' }
@@ -103,7 +105,17 @@ export function PurchaseButton({
 
   if (!href) return null
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer nofollow" className={cls} style={style} onClick={onClick}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      className={cls}
+      style={style}
+      onClick={() => {
+        onPurchase?.()
+        onClick?.()
+      }}
+    >
       {config.purchaseLabel}
       <ArrowUpRight aria-hidden className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
     </a>

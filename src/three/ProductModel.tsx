@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 import type { ModelSource } from '@/showroom/types'
-import { getAssetBlob } from '@/studio/assets'
+import { assetBlob } from '@/studio/assets'
 import { ProceduralModel } from './products'
 
 /** Target size (largest dimension) every model is normalised to. */
@@ -45,7 +45,7 @@ function loadUpload(assetId: string): Promise<GLTF> {
   let p = parsed.get(assetId)
   if (!p) {
     p = (async () => {
-      const blob = await getAssetBlob(assetId)
+      const blob = await assetBlob(assetId)
       if (!blob) throw new Error('Model file not found.')
       const buffer = await blob.arrayBuffer()
       const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
