@@ -8,7 +8,7 @@ import { gsap, useGSAP } from '@/lib/gsap'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 import { ProductModel } from '@/three/ProductModel'
 import { SceneCanvas } from '@/three/SceneCanvas'
-import { fontClass, ModeBadge, PhotoMotion, PurchaseButton } from '../parts'
+import { bodyFontFamily, fontClass, ModeBadge, PhotoMotion, PurchaseButton } from '../parts'
 import type { ShowroomChapter, ShowroomConfig } from '../types'
 
 const { damp, dampAngle } = (() => {
@@ -133,11 +133,11 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
   return (
     <div
       ref={root}
-      className="relative min-h-[100svh] overflow-hidden transition-colors duration-700"
-      style={{ backgroundColor: wall, color: ink, ['--sr-accent' as string]: ink, ['--sr-on-accent' as string]: wall }}
+      className="relative min-h-[calc(var(--sr-vh)*100)] overflow-hidden transition-colors duration-700"
+      style={{ fontFamily: bodyFontFamily(config.theme.bodyFont), backgroundColor: wall, color: ink, ['--sr-accent' as string]: ink, ['--sr-on-accent' as string]: wall }}
     >
       <div
-        className="absolute inset-x-0 top-0 h-[68svh] touch-pan-y md:inset-0 md:h-auto"
+        className="absolute inset-x-0 top-0 h-[calc(var(--sr-vh)*68)] touch-pan-y @3xl:inset-0 @3xl:h-auto"
         onPointerDown={(e) => {
           dragStart.current = { x: e.clientX, base: drag.current }
         }}
@@ -156,17 +156,17 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
             pauseOffscreen={false}
             shadows
             fallback={
-              photo ? <PhotoMotion image={photo} className="absolute inset-[14%_12%_30%] md:inset-[10%_30%_14%]" fit="contain" /> : null
+              photo ? <PhotoMotion image={photo} className="absolute inset-[14%_12%_30%] @3xl:inset-[10%_30%_14%]" fit="contain" /> : null
             }
           >
             <GalleryStage config={config} chapter={chapter} drag={drag} wall={wall} reduced={reduced} />
           </SceneCanvas>
         ) : photo ? (
-          <PhotoMotion key={photo.src} image={photo} className="absolute inset-[14%_12%_34%] md:inset-[10%_30%_14%]" fit="contain" priority />
+          <PhotoMotion key={photo.src} image={photo} className="absolute inset-[14%_12%_34%] @3xl:inset-[10%_30%_14%]" fit="contain" priority />
         ) : null}
       </div>
 
-      <div className="pointer-events-none relative z-10 flex min-h-[100svh] flex-col justify-between px-[var(--gutter)] pb-6 pt-32 md:pb-10 md:pt-36">
+      <div className="pointer-events-none relative z-10 flex min-h-[calc(var(--sr-vh)*100)] flex-col justify-between px-[var(--gutter)] pb-6 pt-32 @3xl:pb-10 @3xl:pt-36">
         <div className="flex items-start justify-between gap-4">
           <h1 data-gal-in className={`${display} text-[clamp(2.4rem,6vw,5.5rem)]`}>
             {config.productName}
@@ -176,9 +176,9 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
           </span>
         </div>
 
-        <div className="grid gap-6 max-md:mt-[44svh] md:grid-cols-12 md:items-end">
+        <div className="grid gap-6 @max-3xl:mt-[calc(var(--sr-vh)*44)] @3xl:grid-cols-12 @3xl:items-end">
           {/* Angle navigation */}
-          <div data-gal-in className="pointer-events-auto md:col-span-5">
+          <div data-gal-in className="pointer-events-auto @3xl:col-span-5">
             <div data-gal-caption aria-live="polite" className="mb-5 max-w-xs">
               <p className="meta" style={{ color: mutedInk }}>
                 {String(index + 1).padStart(2, '0')} / {String(views.length).padStart(2, '0')} · {chapter?.title}
@@ -202,7 +202,7 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
               >
                 <ArrowRight aria-hidden className="size-5" />
               </button>
-              <div role="tablist" aria-label="Views" className="ml-3 hidden gap-1 sm:flex">
+              <div role="tablist" aria-label="Views" className="ml-3 hidden gap-1 @2xl:flex">
                 {views.map((v, i) => (
                   <button
                     key={v.id}
@@ -224,7 +224,7 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
           <aside
             data-gal-in
             aria-label="Wall label"
-            className="pointer-events-auto w-full max-w-sm justify-self-end p-5 md:col-span-4 md:col-start-9 md:p-6"
+            className="pointer-events-auto w-full max-w-sm justify-self-end p-5 @3xl:col-span-4 @3xl:col-start-9 @3xl:p-6"
             style={{ backgroundColor: ink === '#f2f0eb' ? 'rgb(255 255 255 / 0.06)' : 'rgb(255 255 255 / 0.55)', backdropFilter: 'blur(10px)' }}
           >
             <p className="meta" style={{ color: mutedInk }}>

@@ -71,7 +71,7 @@ export function Hero() {
           </p>
           <div data-hero-fade className="flex flex-wrap gap-3">
             <LinkButton to="/demo/aura">Explore the demo</LinkButton>
-            <LinkButton to="/create" variant="ghost">
+            <LinkButton to="/studio/new" variant="ghost">
               Create your showroom
             </LinkButton>
           </div>

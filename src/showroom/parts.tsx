@@ -17,9 +17,14 @@ export function fontClass(id: FontId) {
   }
 }
 
+export function bodyFontFamily(id: FontId) {
+  return id === 'instrument' ? 'var(--font-serif)' : 'var(--font-sans)'
+}
+
 export function themeVars(config: ShowroomConfig): CSSProperties {
   const t = config.theme
   return {
+    fontFamily: bodyFontFamily(t.bodyFont),
     '--sr-bg': t.background,
     '--sr-surface': t.surface,
     '--sr-text': t.text,
@@ -49,8 +54,8 @@ export function DemoNotice({ brand }: { brand: string }) {
   return (
     <div role="note" className="meta flex items-center justify-center gap-2 bg-lime px-4 py-2 text-center text-obsidian">
       <Info aria-hidden className="size-3.5 shrink-0" />
-      <span className="md:hidden">Demo — {brand} is a fictional brand</span>
-      <span className="hidden md:inline">Demo showroom — {brand} is a fictional brand created by OBJECT. Not a real product.</span>
+      <span className="@3xl:hidden">Demo — {brand} is a fictional brand</span>
+      <span className="hidden @3xl:inline">Demo showroom — {brand} is a fictional brand created by OBJECT. Not a real product.</span>
     </div>
   )
 }

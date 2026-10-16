@@ -47,11 +47,26 @@ src/
 
 ## Plan for the next phases
 
-### Phase B: Product builder
-`/studio/:id/edit`: left panel (template, mode, content, images, GLB/glTF,
-colours, fonts, features/hotspots, purchase URL, animation presets), centre
-live `<ShowroomRenderer>`, top bar (save, preview desktop/mobile, publish).
-Collapsible panels on mobile. Local draft autosave → Supabase in Phase C.
+### Phase B: Product builder (done)
+- `src/studio/repository.ts`: `ShowroomRepository` interface (list, get,
+  create, saveDraft, setSlug, publish, unpublish, duplicate, remove) with a
+  `LocalShowroomRepository`. Each showroom keeps a **draft** and a
+  **published snapshot**: editing never changes what visitors see until the
+  merchant publishes again.
+- `src/studio/assets.ts`: files in IndexedDB, referenced as `asset:<id>`;
+  resolved to blob: URLs for images, and parsed from bytes for models
+  (`GLTFLoader.parse`, no network fetch).
+- `src/studio/validation.ts`: uploads checked by **magic bytes** (JPEG, PNG,
+  WebP, GLB), size limits, glTF with external URIs refused; publish
+  requirements (name, media matching the mode, alt text, safe purchase URL).
+- `ShowroomFrame` (`src/showroom/frame.tsx`): templates use container
+  queries (`@3xl:`) and a `--sr-vh` unit, so the same template renders
+  full-screen, in the editor's desktop preview and in its 390 px phone
+  preview. Scroll animations follow the frame's scroller.
+- Editor: autosave 500 ms after the last change (and on Cmd/Ctrl+S, route
+  change, unload), save status, first-showroom checklist, publish dialog
+  with copy link, unpublish confirmation, delete. Phones get Edit/Preview
+  tabs and collapsible sections.
 
 ### Phase C: SaaS foundation (Supabase)
 Tables: `profiles`, `workspaces`, `showrooms`, `showroom_content`

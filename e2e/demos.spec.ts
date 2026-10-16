@@ -42,7 +42,8 @@ test('unknown demo shows 404', async ({ page }) => {
   await expect(page.getByText('404')).toBeVisible()
 })
 
-test('create page does not pretend checkout exists', async ({ page }) => {
+test('create redirects to the studio onboarding', async ({ page }) => {
   await page.goto('/create?plan=studio')
-  await expect(page.getByText(/nothing can be purchased at this stage/i)).toBeVisible()
+  await expect(page).toHaveURL(/\/studio\/new/)
+  await expect(page.getByRole('heading', { name: /new showroom/i })).toBeVisible()
 })

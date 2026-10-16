@@ -5,6 +5,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { bindPointer } from '@/lib/pointer'
 import { getDemo } from '@/showroom/demos'
 import { DemoNotice } from '@/showroom/parts'
+import { ShowroomFrame } from '@/showroom/frame'
 import { ShowroomRenderer } from '@/showroom/ShowroomRenderer'
 import NotFound from './NotFound'
 
@@ -37,7 +38,9 @@ export default function DemoShowroom() {
         </div>
       </div>
       <main key={config.slug} className="pt-0">
-        <ShowroomRenderer config={config} />
+        <ShowroomFrame>
+          <ShowroomRenderer config={config} />
+        </ShowroomFrame>
       </main>
       <DemoSwitcher current={config.slug} />
     </div>

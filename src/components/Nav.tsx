@@ -35,7 +35,7 @@ export function Nav() {
         ))}
       </nav>
       <Link
-        to="/create"
+        to="/studio"
         className="inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold text-obsidian bg-porcelain transition-colors hover:bg-lime"
       >
         Start

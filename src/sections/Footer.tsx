@@ -8,7 +8,7 @@ export function Footer() {
         <p className="display max-w-[16ch] text-[clamp(2rem,5vw,4.5rem)]">
           Don’t just show it. <span className="text-lime">Make it unforgettable.</span>
         </p>
-        <LinkButton to="/create">Create your showroom</LinkButton>
+        <LinkButton to="/studio/new">Create your showroom</LinkButton>
       </div>
       <p aria-hidden className="display mt-20 select-none text-[clamp(3.5rem,14.6vw,22rem)] leading-[0.78] text-graphite">
         OBJECT.

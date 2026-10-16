@@ -5,12 +5,14 @@
 OBJECT. lets independent brands turn a product into an interactive showroom:
 upload, design, publish a shareable link. No code.
 
-> **Status: Phase A (Visual Experience) — complete.**
-> The landing page and three demo showrooms are live code. The editor,
-> accounts, database and payments (Phases B–D) are **not built yet**; the
-> "Create your showroom" route says so explicitly. Nothing can be purchased.
+> **Status: Phases A (Visual Experience) and B (Product Builder) complete.**
+> The landing page, three demo showrooms and a working showroom editor are
+> live code. The studio runs in **local mode**: showrooms and files are
+> stored in the browser (localStorage + IndexedDB), so a published link
+> works on the device that published it. Accounts, the database and
+> payments (Phases C–D) are next. Nothing can be purchased.
 
-## What's in Phase A
+## Routes
 
 | Route | What it is |
 |---|---|
@@ -18,7 +20,11 @@ upload, design, publish a shareable link. No code.
 | `/demo/aura` | **AURA** Nº 07: fragrance · *Orbit* template · True 3D, hotspots, drag to turn |
 | `/demo/form` | **FORM** Cuff 01: accessory · *Editorial* template · Photo Motion |
 | `/demo/mono` | **MONO** Vessel III: home object · *Gallery* template · True 3D, views, wall colours |
-| `/create` | Honest placeholder until the studio opens |
+| `/studio` | My showrooms: drafts and published, duplicate, delete |
+| `/studio/new` | Onboarding: template → photos or 3D model → product name |
+| `/studio/:id` | Editor: settings on the left, live preview (desktop / phone), save status, publish |
+| `/studio/:id/preview` | Full-screen preview of the draft |
+| `/s/:slug` | The published, read-only showroom |
 
 AURA, FORM and MONO are fictional brands, modelled procedurally in Three.js.
 They are labelled as such on every page.

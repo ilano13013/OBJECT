@@ -1,9 +1,13 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, createMemoryRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, createMemoryRouter, Navigate, RouterProvider } from 'react-router'
 import Landing from './pages/Landing'
 
 const DemoShowroom = lazy(() => import('./pages/DemoShowroom'))
-const Create = lazy(() => import('./pages/Create'))
+const StudioHome = lazy(() => import('./pages/studio/StudioHome'))
+const NewShowroom = lazy(() => import('./pages/studio/NewShowroom'))
+const Editor = lazy(() => import('./pages/studio/Editor'))
+const StudioPreview = lazy(() => import('./pages/studio/StudioPreview'))
+const PublicShowroom = lazy(() => import('./pages/PublicShowroom'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const Capture = lazy(() => import('./pages/Capture'))
 
@@ -19,7 +23,12 @@ const createRouter = import.meta.env.VITE_MEMORY_ROUTER ? createMemoryRouter : c
 const router = createRouter([
   { path: '/', element: <Landing /> },
   { path: '/demo/:slug', element: s(<DemoShowroom />) },
-  { path: '/create', element: s(<Create />) },
+  { path: '/create', element: <Navigate to="/studio/new" replace /> },
+  { path: '/studio', element: s(<StudioHome />) },
+  { path: '/studio/new', element: s(<NewShowroom />) },
+  { path: '/studio/:id', element: s(<Editor />) },
+  { path: '/studio/:id/preview', element: s(<StudioPreview />) },
+  { path: '/s/:slug', element: s(<PublicShowroom />) },
   ...(import.meta.env.DEV ? [{ path: '/__capture/:id', element: s(<Capture />) }] : []),
   { path: '*', element: s(<NotFound />) },
 ])

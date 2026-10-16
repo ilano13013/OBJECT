@@ -1,10 +1,17 @@
-# Known limits (end of Phase A)
+# Known limits (end of Phase B)
 
 ## Not built yet
-- **Editor, accounts, dashboard, database, uploads, publishing, payments,
-  analytics** (Phases B–D). `/create` states this; pricing buttons lead there.
-  No checkout exists and nothing can be bought.
-- No public `/s/:slug` route yet: only the three demo routes.
+- **Accounts, database, cloud storage, payments, quotas, statistics**
+  (Phases C–D). No checkout exists and nothing can be bought.
+- **Local mode.** Showrooms live in the browser that created them
+  (localStorage for content, IndexedDB for files). A published `/s/:slug`
+  link only works on that device until Phase C moves storage to Supabase.
+  Clearing site data deletes them. Private browsing may block storage; the
+  studio says so.
+- Uploaded models: GLB or self-contained glTF up to 50 MB; Meshopt
+  compression works, **Draco and KTX2 textures are not supported yet**.
+- Hotspot positions are set with Height / Around sliders, not by clicking on
+  the model.
 
 ## Product truth
 - Demo products are procedural Three.js models, not scans or photographs.

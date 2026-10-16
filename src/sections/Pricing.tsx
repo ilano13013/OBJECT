@@ -62,7 +62,7 @@ export function Pricing() {
               </div>
 
               <div className="mt-auto pt-12">
-                <LinkButton to={`/create?plan=${plan.id}`} variant={featured ? 'primary' : 'ghost'}>
+                <LinkButton to={`/studio/new?plan=${plan.id}`} variant={featured ? 'primary' : 'ghost'}>
                   {featured ? 'Start Studio' : 'Create one showroom'}
                 </LinkButton>
               </div>

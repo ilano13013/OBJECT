@@ -9,6 +9,7 @@ import { ProductModel } from '@/three/ProductModel'
 import { SceneCanvas } from '@/three/SceneCanvas'
 import { Backlight } from '@/three/Backlight'
 import { Studio } from '@/three/Studio'
+import { useShowroomEnv } from '../frame'
 import { fontClass, ModeBadge, PhotoMotion, PurchaseButton, themeVars } from '../parts'
 import type { ShowroomConfig, ShowroomFeature } from '../types'
 
@@ -94,7 +95,7 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
   const display = fontClass(config.theme.displayFont)
   const show3d = config.mode === 'true3d' && !!config.model
   const photo = config.images[0]
-  const narrow = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  const { narrow } = useShowroomEnv()
 
   useGSAP(
     () => {
@@ -105,10 +106,10 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
   )
 
   return (
-    <div ref={root} className="relative min-h-[100svh] overflow-hidden" style={themeVars(config)}>
-      <div className="absolute inset-x-0 top-0 h-[100svh]" style={{ background: `radial-gradient(55% 55% at 50% 45%, var(--sr-surface), var(--sr-bg) 75%)` }} />
+    <div ref={root} className="relative min-h-[calc(var(--sr-vh)*100)] overflow-hidden" style={themeVars(config)}>
+      <div className="absolute inset-x-0 top-0 h-[calc(var(--sr-vh)*100)]" style={{ background: `radial-gradient(55% 55% at 50% 45%, var(--sr-surface), var(--sr-bg) 75%)` }} />
 
-      <div className="absolute inset-x-0 top-0 h-[100svh]">
+      <div className="absolute inset-x-0 top-0 h-[calc(var(--sr-vh)*100)]">
         {show3d ? (
           <SceneCanvas
             className="absolute inset-0"
@@ -126,11 +127,11 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
             <OrbitStage config={config} active={active} onSelect={setActive} reduced={reduced} />
           </SceneCanvas>
         ) : photo ? (
-          <PhotoMotion image={photo} className="absolute inset-[12%_10%_18%] md:inset-[10%_28%]" fit="contain" priority />
+          <PhotoMotion image={photo} className="absolute inset-[12%_10%_18%] @3xl:inset-[10%_28%]" fit="contain" priority />
         ) : null}
       </div>
 
-      <div className="pointer-events-none relative z-10 flex min-h-[100svh] flex-col justify-between gap-10 px-[var(--gutter)] pb-8 pt-32 md:pb-12 md:pt-36">
+      <div className="pointer-events-none relative z-10 flex min-h-[calc(var(--sr-vh)*100)] flex-col justify-between gap-10 px-[var(--gutter)] pb-8 pt-32 @3xl:pb-12 @3xl:pt-36">
         <div className="flex items-start justify-between gap-4">
           <p data-orbit-in className="meta" style={{ color: 'var(--sr-muted)' }}>
             {config.brand}
@@ -140,16 +141,16 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
           </span>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-12 md:items-end">
-          <div className="md:col-span-7">
+        <div className="grid gap-8 @3xl:grid-cols-12 @3xl:items-end">
+          <div className="@3xl:col-span-7">
             <h1 data-orbit-in className={`${display} text-[clamp(3.2rem,9vw,9rem)]`}>
               {config.productName}
             </h1>
-            <p data-orbit-in className="mt-4 max-w-md text-lg md:text-xl">
+            <p data-orbit-in className="mt-4 max-w-md text-lg @3xl:text-xl">
               {config.tagline}
             </p>
           </div>
-          <div className="pointer-events-auto flex flex-col gap-5 md:col-span-4 md:col-start-9">
+          <div className="pointer-events-auto flex flex-col gap-5 @3xl:col-span-4 @3xl:col-start-9">
             <p data-orbit-in className="max-w-sm text-sm leading-relaxed" style={{ color: 'var(--sr-muted)' }}>
               {config.description}
             </p>
@@ -167,7 +168,7 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
 
       {show3d && (
         <p
-          className="meta pointer-events-none absolute right-[var(--gutter)] top-[13.5rem] z-10 hidden items-center gap-2 md:flex"
+          className="meta pointer-events-none absolute right-[var(--gutter)] top-[13.5rem] z-10 hidden items-center gap-2 @3xl:flex"
           style={{ color: 'var(--sr-muted)' }}
         >
           <Move3d aria-hidden className="size-4" /> Drag to turn · tap the points
@@ -179,7 +180,7 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
         <div aria-live="polite" className="sr-only">
           {feature ? `${feature.title}. ${feature.body}` : ''}
         </div>
-        <ul className="grid gap-8 md:grid-cols-3">
+        <ul className="grid gap-8 @3xl:grid-cols-3">
           {config.features.map((f) => (
             <li key={f.id}>
               <button
@@ -201,7 +202,7 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
           ))}
         </ul>
         {config.details.length > 0 && (
-          <dl className="mt-12 grid grid-cols-2 gap-6 md:grid-cols-4">
+          <dl className="mt-12 grid grid-cols-2 gap-6 @3xl:grid-cols-4">
             {config.details.map((d) => (
               <div key={d.label}>
                 <dt className="meta" style={{ color: 'var(--sr-muted)' }}>

@@ -19,7 +19,10 @@ export type ProceduralModelId = 'aura-bottle' | 'form-cuff' | 'mono-vase'
 
 export type ModelSource =
   | { kind: 'procedural'; id: ProceduralModelId }
+  /** A hosted GLB/glTF (Phase C: Supabase Storage). */
   | { kind: 'gltf'; url: string }
+  /** A merchant upload held in the studio's asset store, parsed from bytes. */
+  | { kind: 'upload'; assetId: string; name: string }
 
 export interface ShowroomTheme {
   background: string
