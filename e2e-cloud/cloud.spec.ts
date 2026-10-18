@@ -54,8 +54,9 @@ test('a merchant signs up, builds a showroom, is held by the publish quota, then
 
   // The server refuses: no plan, no slot.
   await page.getByRole('button', { name: /^publish$/i }).click()
-  await expect(page.getByRole('dialog')).toContainText(/no free publishing slot/i)
-  await page.getByRole('button', { name: 'Back to editing' }).click()
+  await expect(page.getByRole('dialog')).toContainText('Choose a plan to publish')
+  await expect(page.getByRole('button', { name: /buy this showroom/i })).toBeVisible()
+  await page.getByRole('button', { name: 'Close' }).click()
 
   // An operator grants one slot (Phase D: a paid order or subscription does this).
   sql(`update public.workspaces set bonus_publish_slots = 1 where owner_id = (select id from auth.users where email = '${alice.email}')`)

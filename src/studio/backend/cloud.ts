@@ -144,7 +144,10 @@ export class CloudBackend implements StudioBackend {
     const row = (data as { ok: boolean; issues: string[] }[])[0]
     this.emit()
     if (row?.ok) return { ok: true }
-    return { ok: false, issues: (row?.issues ?? ['Publishing failed.']).map((message) => ({ field: 'server', message })) }
+    return {
+      ok: false,
+      issues: (row?.issues ?? ['Publishing failed.']).map((message) => ({ field: /publishing slot/i.test(message) ? 'plan' : 'server', message })),
+    }
   }
 
   async unpublish(id: string) {

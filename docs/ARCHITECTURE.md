@@ -99,12 +99,28 @@ src/
 - **Tests**: SQL security suite (`supabase/tests`), cloud e2e
   (`e2e-cloud`) against Auth + PostgREST + Storage.
 
-### Phase D: Monetisation (Stripe test mode)
-Vercel functions: `create-checkout-session` (One: payment, Studio:
-subscription), `stripe-webhook` (signature verified; grants rights from
-`checkout.session.completed`, `customer.subscription.*`,
-`invoice.payment_failed`), `billing-portal`. Publishing checks quota
-server-side (Postgres function), never from the client.
+### Phase D: Monetisation (done, Stripe test mode)
+- `api/` — Vercel Functions with Web-standard handlers (`POST(req): Response`);
+  thin wrappers over `server/` (never bundled into the browser).
+  `scripts/vite-api-dev.ts` serves the same handlers in `vite dev`.
+- `server/env.ts` refuses live keys unless `ALLOW_LIVE_PAYMENTS=true`.
+- `server/billing.ts`:
+  - `createCheckout`: user verified with Supabase Auth, showroom ownership
+    checked, Stripe customer per workspace (idempotent), pending order row.
+  - `verifyEvent` + `applyEvent`: signature over the raw body, idempotency
+    via `stripe_events`, orders marked paid / failed / refunded,
+    subscriptions synced (stale events about an older subscription cannot
+    overwrite a newer active one), `enforce_entitlement()` after
+    cancellation, unpaid or refund. Any database error → 500 and the event
+    is forgotten so Stripe retries.
+  - `createPortal`: Stripe customer portal.
+- Migration `20261018000100_billing.sql`: `workspaces.stripe_customer_id`,
+  `orders.stripe_payment_intent_id`, one paid order per showroom,
+  `stripe_events`, `enforce_entitlement()` (service role only),
+  `billing_overview()` (owner).
+- Front end: `src/billing/` — plan choice in the publish dialog, return from
+  Checkout waits for the webhook (polling `billing_overview`), account
+  billing section with portal.
 
 ### Phase E: Quality & launch
 Auth/RLS isolation tests, quota and webhook tests, Lighthouse on mid-tier

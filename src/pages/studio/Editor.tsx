@@ -1,6 +1,8 @@
 import { ArrowLeft, Check, CircleAlert, Copy, ExternalLink, Eye, LoaderCircle, Monitor, Smartphone, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
+import { paymentsAvailable, waitForPayment } from '@/billing/client'
+import { PlanChoice } from '@/billing/PlanChoice'
 import { ShowroomFrame } from '@/showroom/frame'
 import { ShowroomRenderer } from '@/showroom/ShowroomRenderer'
 import type { ShowroomConfig } from '@/showroom/types'
@@ -66,6 +68,24 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
   const [replay, setReplay] = useState(0)
   const [busy, setBusy] = useState(false)
   const [showRestore, setShowRestore] = useState(!!backup)
+  const [params, setParams] = useSearchParams()
+  const [checkout, setCheckout] = useState<null | 'confirming' | 'paid' | 'slow' | 'cancelled'>(() => {
+    const c = params.get('checkout')
+    return c === 'success' ? 'confirming' : c === 'cancelled' ? 'cancelled' : null
+  })
+
+  // Back from Stripe: wait for the server webhook to record the payment. The return URL proves nothing.
+  useEffect(() => {
+    if (!params.get('checkout')) return
+    setParams({}, { replace: true })
+    if (checkout !== 'confirming') return
+    let alive = true
+    waitForPayment((o) => o.paid_showrooms.includes(showroom.id) || o.plan === 'studio').then((ok) => alive && setCheckout(ok ? 'paid' : 'slow'))
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [dialog, setDialog] = useState<null | { kind: 'issues'; issues: PublishIssue[] } | { kind: 'live' }>(null)
   const timer = useRef<number | undefined>(undefined)
   const latest = useRef(draft)
@@ -205,6 +225,30 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
         )}
       </header>
 
+      {checkout && (
+        <div
+          role="status"
+          className={`flex flex-wrap items-center justify-between gap-3 border-b border-hairline px-4 py-3 text-sm ${checkout === 'paid' ? 'bg-lime text-obsidian' : 'bg-graphite'}`}
+        >
+          <span>
+            {checkout === 'confirming' && 'Payment received by Stripe. Confirming it with our server…'}
+            {checkout === 'paid' && 'Payment confirmed. You can publish this showroom now.'}
+            {checkout === 'slow' && 'Stripe hasn’t confirmed the payment yet. It can take a minute: reload this page shortly. You won’t be charged twice.'}
+            {checkout === 'cancelled' && 'Checkout cancelled. Nothing was charged.'}
+          </span>
+          <span className="flex gap-2">
+            {checkout === 'paid' && (
+              <button type="button" onClick={() => void publish()} className="min-h-10 cursor-pointer rounded-full bg-obsidian px-4 font-semibold text-porcelain">
+                Publish now
+              </button>
+            )}
+            <button type="button" onClick={() => setCheckout(null)} className="min-h-10 cursor-pointer px-3 opacity-70 hover:opacity-100">
+              Dismiss
+            </button>
+          </span>
+        </div>
+      )}
+
       {showRestore && backup && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline bg-graphite px-4 py-3 text-sm">
           <span>You have changes from {new Date(backup.savedAt).toLocaleString()} that weren’t saved.</span>
@@ -273,9 +317,15 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
       </div>
 
       {dialog && (
-        <Dialog onClose={() => setDialog(null)} title={dialog.kind === 'issues' ? 'Almost ready to publish' : 'Your showroom is live'}>
+        <Dialog onClose={() => setDialog(null)} title={
+            dialog.kind === 'issues'
+              ? dialog.issues.length === 1 && dialog.issues[0]!.field === 'plan'
+                ? 'Choose a plan to publish'
+                : 'Almost ready to publish'
+              : 'Your showroom is live'
+          }>
           {dialog.kind === 'issues' ? (
-            <IssuesBody issues={dialog.issues} onClose={() => setDialog(null)} />
+            <IssuesBody issues={dialog.issues} showroomId={showroom.id} onClose={() => setDialog(null)} />
           ) : (
             <LiveBody
               showroom={showroom}
@@ -443,7 +493,16 @@ function Dialog({ title, children, onClose }: { title: string; children: ReactNo
   )
 }
 
-function IssuesBody({ issues, onClose }: { issues: PublishIssue[]; onClose: () => void }) {
+function IssuesBody({ issues, showroomId, onClose }: { issues: PublishIssue[]; showroomId: string; onClose: () => void }) {
+  const needsPlan = issues.some((i) => i.field === 'plan')
+  if (needsPlan && issues.length === 1 && paymentsAvailable) {
+    return (
+      <>
+        <p className="text-sm leading-relaxed text-silver">Your showroom is ready. Choose how to publish it:</p>
+        <PlanChoice showroomId={showroomId} />
+      </>
+    )
+  }
   return (
     <>
       <p className="text-sm text-silver">Fix these and publish again:</p>

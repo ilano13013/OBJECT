@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/((?!assets/|favicon).*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!api/|assets/|favicon).*)", "destination": "/index.html" }],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [{ "key": "cache-control", "value": "no-store" }]
+    }
+  ]
 }

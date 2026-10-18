@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { signOut } from '@/auth/actions'
+import { BillingSection } from '@/billing/BillingSection'
 import { useAuth } from '@/auth/AuthProvider'
 import { supabase } from '@/lib/supabase'
-import { backend, type Entitlement } from '@/studio/backend'
 import { inputClass } from '@/studio/ui'
 import { StudioShell } from './StudioShell'
-
-const PLAN_LABEL: Record<Entitlement['plan'], string> = { none: 'No plan yet', one: 'One Showroom', studio: 'Studio' }
 
 export default function Account() {
   const { mode, user } = useAuth()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [workspace, setWorkspace] = useState('')
-  const [ent, setEnt] = useState<Entitlement | null>(null)
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -34,7 +31,6 @@ export default function Account() {
       .limit(1)
       .single()
       .then(({ data }) => setWorkspace(data?.name ?? ''))
-    backend.entitlement().then(setEnt).catch(() => setEnt(null))
   }, [user])
 
   async function save(e: React.FormEvent) {
@@ -95,31 +91,7 @@ export default function Account() {
               </form>
             </section>
 
-            <section aria-labelledby="plan-h" className="grid gap-4 border-t border-hairline pt-10">
-              <h2 id="plan-h" className="text-xl font-semibold tracking-tight">
-                Plan & billing
-              </h2>
-              {ent ? (
-                <dl className="grid grid-cols-2 gap-6 sm:grid-cols-3">
-                  <div>
-                    <dt className="meta text-ash">Current plan</dt>
-                    <dd className="mt-1 text-lg">{PLAN_LABEL[ent.plan]}</dd>
-                  </div>
-                  <div>
-                    <dt className="meta text-ash">Publishing slots</dt>
-                    <dd className="mt-1 text-lg tabular-nums">
-                      {ent.used} / {ent.allowance}
-                    </dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="text-sm text-ash">Loading your plan…</p>
-              )}
-              <p className="text-sm leading-relaxed text-silver">
-                Checkout, invoices and the billing portal arrive with payments. Until then nothing is charged, and publishing needs a slot granted by the
-                OBJECT. team. <Link to="/#pricing" className="underline underline-offset-4">See the plans</Link>.
-              </p>
-            </section>
+            <BillingSection />
 
             <section className="grid gap-4 border-t border-hairline pt-10">
               <button

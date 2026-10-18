@@ -1,9 +1,16 @@
-# Known limits (end of Phase C)
+# Known limits (end of Phase D)
 
 ## Not built yet
-- **Payments** (Phase D): no checkout, no billing portal, nothing can be
-  bought. In cloud mode publishing needs a slot granted in SQL
-  (`workspaces.bonus_publish_slots`); see docs/SUPABASE.md.
+- **Payments run in Stripe test mode only.** Live keys are refused by the
+  server until `ALLOW_LIVE_PAYMENTS=true`.
+- **Not yet connected to a real Stripe account.** Checkout/portal calls were
+  tested against `stripe-mock` (Stripe’s official API mock) and webhooks
+  with payloads signed exactly as Stripe signs them; the hosted Checkout and
+  portal pages themselves were not exercised.
+- VAT: prices are shown as fixed amounts; configure Stripe Tax (or VAT-
+  inclusive prices) before a real launch.
+- Studio quota changes (e.g. from 5 to 10) are made per workspace in SQL;
+  there is no admin UI.
 - **Not yet connected to a real Supabase project.** The schema, policies and
   cloud flows were tested on PostgreSQL 16 with Supabase Auth (GoTrue),
   PostgREST and Supabase Storage run locally, not on supabase.com.

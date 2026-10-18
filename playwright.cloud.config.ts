@@ -3,8 +3,8 @@ import { defineConfig, devices } from '@playwright/test'
 /**
  * End-to-end tests in cloud mode, against a Supabase-compatible stack
  * (supabase/local-stack/start.sh) or a disposable Supabase project.
- * Requires SUPABASE_URL, SUPABASE_ANON_KEY and TEST_DATABASE_URL (to grant a
- * publishing slot to the test accounts, as an operator would).
+ * Requires SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
+ * TEST_DATABASE_URL (operator actions) and stripe-mock on 127.0.0.1:12111.
  */
 const chromiumArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 const executablePath = process.env.CHROMIUM_PATH || (process.env.CI ? undefined : '/opt/pw-browsers/chromium')
@@ -15,12 +15,26 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: { baseURL: 'http://localhost:4174', launchOptions: { args: chromiumArgs, executablePath } },
+  // Dev server: serves /api (Stripe Checkout, portal, webhook) like Vercel functions.
   webServer: {
-    command: 'npx vite build --outDir dist-cloud && npx vite preview --outDir dist-cloud --port 4174 --strictPort',
+    command: 'npx vite --port 4174 --strictPort',
     port: 4174,
     reuseExistingServer: false,
     timeout: 180_000,
-    env: { VITE_SUPABASE_URL: process.env.SUPABASE_URL ?? '', VITE_SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ?? '' },
+    env: {
+      VITE_SUPABASE_URL: process.env.SUPABASE_URL ?? '',
+      VITE_SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ?? '',
+      SUPABASE_URL: process.env.SUPABASE_URL ?? '',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
+      APP_URL: 'http://localhost:4174',
+      STRIPE_SECRET_KEY: 'sk_test_e2e',
+      STRIPE_WEBHOOK_SECRET: 'whsec_e2e_secret',
+      STRIPE_PRICE_ONE: 'price_one_e2e',
+      STRIPE_PRICE_STUDIO: 'price_studio_e2e',
+      STRIPE_API_HOST: process.env.STRIPE_API_HOST ?? '127.0.0.1',
+      STRIPE_API_PORT: process.env.STRIPE_API_PORT ?? '12111',
+      STRIPE_API_PROTOCOL: 'http',
+    },
   },
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'], launchOptions: { args: chromiumArgs, executablePath } } }],
 })

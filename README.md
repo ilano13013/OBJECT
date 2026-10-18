@@ -5,7 +5,7 @@
 OBJECT. lets independent brands turn a product into an interactive showroom:
 upload, design, publish a shareable link. No code.
 
-> **Status: Phases A, B and C complete.** Landing page, three demo
+> **Status: Phases A–D complete.** Landing page, three demo
 > showrooms, the showroom editor, and the SaaS foundation: accounts,
 > Supabase schema with row-level security, cloud file storage, public
 > links, statistics.
@@ -16,8 +16,9 @@ upload, design, publish a shareable link. No code.
 >   Setup guide: [`docs/SUPABASE.md`](docs/SUPABASE.md).
 > - **Local** otherwise: no accounts, showrooms stored in this browser.
 >
-> Payments (Phase D) are next. Nothing can be purchased; publishing in cloud
-> mode needs a slot granted by an operator until Stripe is connected.
+> Payments: Stripe Checkout (One Showroom 49 €, Studio 29 €/month), signed
+> webhooks, customer portal, server-side quotas. **Test mode only** until
+> launch is authorised. Setup: [`docs/STRIPE.md`](docs/STRIPE.md).
 
 ## Routes
 
@@ -32,7 +33,10 @@ upload, design, publish a shareable link. No code.
 | `/studio/:id` | Editor: settings on the left, live preview (desktop / phone), save status, publish |
 | `/studio/:id/preview` | Full-screen preview of the draft |
 | `/studio/:id/stats` | Views, visitors, purchase clicks, click rate over 7 / 30 days |
-| `/account` | Profile, studio name, plan and publishing slots, sign out |
+| `/account` | Profile, studio name, plan, renewal, billing portal, Start Studio, sign out |
+| `POST /api/billing/checkout` | Server: Stripe Checkout for One Showroom or Studio (signed-in user) |
+| `POST /api/billing/portal` | Server: Stripe customer portal |
+| `POST /api/stripe/webhook` | Server: signature-verified Stripe events, the only place payments are recorded |
 | `/login`, `/auth/callback`, `/auth/reset` | Sign in / create account / email links / password reset (cloud mode) |
 | `/s/:slug` | The published, read-only showroom |
 
@@ -43,8 +47,8 @@ They are labelled as such on every page.
 
 React 19 · TypeScript · Vite · Tailwind CSS v4 · GSAP + ScrollTrigger ·
 Three.js · React Three Fiber · Drei · Supabase (Postgres + RLS, Auth,
-Storage) · Vitest · Playwright · ESLint. Planned: Stripe (Checkout, Billing,
-Customer Portal). Hosted on Vercel.
+Storage) · Stripe (Checkout, Billing, Customer Portal) · Vercel Functions ·
+Vitest · Playwright · ESLint.
 
 ## Run it
 
@@ -63,7 +67,8 @@ npm run lint         # eslint
 npm test             # vitest (unit)
 npm run test:e2e     # playwright: desktop + iPhone 13 viewport (local mode)
 supabase/tests/run.sh                                   # SQL security tests (needs PostgreSQL)
-npx playwright test -c playwright.cloud.config.ts      # cloud-mode e2e (needs a Supabase-compatible stack)
+npx playwright test -c playwright.cloud.config.ts      # cloud-mode e2e incl. payments (stack + stripe-mock)
+BILLING_IT=1 npx vitest run server                      # billing integration (stack + stripe-mock)
 ```
 
 Playwright uses the system Chromium at `/opt/pw-browsers/chromium` when it
@@ -87,4 +92,5 @@ python3 scripts/to-webp.py /tmp/renders src/assets/renders
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): code layout and the plan for phases B–E
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): putting it online (Vercel)
 - [`docs/SUPABASE.md`](docs/SUPABASE.md): connecting Supabase (French)
+- [`docs/STRIPE.md`](docs/STRIPE.md): connecting Stripe in test mode (French)
 - [`docs/KNOWN-LIMITS.md`](docs/KNOWN-LIMITS.md): what is not done yet
