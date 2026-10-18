@@ -38,7 +38,7 @@ export function StatsChart({ series, title }: { series: StatsDay[]; title: strin
         {title}
       </figcaption>
       <div className="relative">
-        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="img" aria-label={`${title}. Use the table below for exact values.`} onMouseLeave={() => setActive(null)}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" role="group" aria-label={`${title}. Each day is a button with its values; the table below lists them all.`} onMouseLeave={() => setActive(null)}>
           {ticks.map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} stroke="#252529" strokeWidth={1} />

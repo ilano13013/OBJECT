@@ -103,6 +103,8 @@ function UploadButton({ label, accept, multiple, onFiles, busy }: { label: strin
         type="file"
         accept={accept}
         multiple={multiple}
+        tabIndex={-1}
+        aria-hidden
         className="sr-only"
         onChange={(e) => {
           const files = Array.from(e.target.files ?? [])
@@ -251,7 +253,7 @@ export function MediaPanel({ showroom, draft, update }: PanelProps) {
                   placeholder="Describe this image"
                   aria-invalid={!img.alt.trim()}
                   onChange={(e) => update((d) => ({ ...d, images: d.images.map((x, j) => (j === i ? { ...x, alt: e.target.value } : x)) }))}
-                  className="w-full min-h-10 rounded bg-transparent px-2 text-sm text-porcelain placeholder:text-ash focus:outline-none focus:ring-2 focus:ring-lime aria-[invalid=true]:placeholder:text-[#ff9d8f]"
+                  className="w-full min-h-10 rounded bg-transparent px-2 text-sm text-porcelain placeholder:text-ash focus:outline-none focus:ring-2 focus:ring-lime aria-[invalid=true]:placeholder:text-danger"
                 />
               </div>
               <div className="flex shrink-0">
@@ -275,7 +277,7 @@ export function MediaPanel({ showroom, draft, update }: PanelProps) {
         )}
       </Field>
       {errors.length > 0 && (
-        <ul role="alert" className="space-y-1 rounded-md bg-[#ff9d8f]/10 p-3 text-[13px] text-[#ffb8ad]">
+        <ul role="alert" className="space-y-1 rounded-md bg-danger/10 p-3 text-[13px] text-danger-soft">
           {errors.map((e) => (
             <li key={e}>{e}</li>
           ))}
@@ -460,7 +462,7 @@ function ContrastNote({ fg, bg, what }: { fg: string; bg: string; what: string }
   const ratio = contrastRatio(fg, bg)
   const ok = ratio >= 4.5
   return (
-    <p className={`text-[12px] tabular-nums ${ok ? 'text-ash' : 'text-[#ffb8ad]'}`}>
+    <p className={`text-[12px] tabular-nums ${ok ? 'text-ash' : 'text-danger-soft'}`}>
       {ok ? `${ratio.toFixed(1)}:1 contrast with ${what}` : `${ratio.toFixed(1)}:1 with ${what}: hard to read. Aim for 4.5:1 or more.`}
     </p>
   )

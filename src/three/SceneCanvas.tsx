@@ -24,6 +24,8 @@ interface SceneCanvasProps extends Omit<CanvasProps, 'children' | 'fallback'> {
   /** Pause rendering while off-screen (default true). */
   pauseOffscreen?: boolean
   label: string
+  /** The scene contains focusable controls (hotspots): expose it as a group, not an image. */
+  interactive?: boolean
 }
 
 /**
@@ -31,7 +33,7 @@ interface SceneCanvasProps extends Omit<CanvasProps, 'children' | 'fallback'> {
  * context-loss recovery, capped pixel ratio and off-screen pausing, so a
  * failing scene never blocks the page around it.
  */
-export function SceneCanvas({ children, fallback, className, pauseOffscreen = true, label, ...canvas }: SceneCanvasProps) {
+export function SceneCanvas({ children, fallback, className, pauseOffscreen = true, label, interactive = false, ...canvas }: SceneCanvasProps) {
   const [supported] = useState(hasWebGL)
   const [failed, setFailed] = useState(false)
   const [visible, setVisible] = useState(true)
@@ -47,7 +49,7 @@ export function SceneCanvas({ children, fallback, className, pauseOffscreen = tr
   if (!supported || failed) return <div className={className}>{fallback}</div>
 
   return (
-    <div ref={ref} className={className} role="img" aria-label={label}>
+    <div ref={ref} className={className} role={interactive ? 'group' : 'img'} aria-label={label}>
       <SceneErrorBoundary onError={() => setFailed(true)}>
         <Canvas
           dpr={[1, 1.75]}

@@ -116,6 +116,7 @@ export function OrbitTemplate({ config }: { config: ShowroomConfig }) {
             label={`${config.productName} by ${config.brand}, interactive 3D model. Drag to rotate.`}
             camera={{ position: [0, 0.3, narrow ? 12 : 7.4], fov: 32 }}
             pauseOffscreen={false}
+            interactive
             fallback={
               photo ? (
                 <PhotoMotion image={photo} className="absolute inset-0" />

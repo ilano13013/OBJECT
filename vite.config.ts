@@ -5,6 +5,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 import { fileURLToPath, URL } from 'node:url'
 import { apiDev } from './scripts/vite-api-dev'
+import { fontPreload } from './scripts/vite-font-preload'
+import securityHeaders from './security-headers.json'
 
 // `vite build --mode artifact` produces one self-contained HTML file (JS, CSS,
 // fonts and images inlined) for sandboxed previews that cannot load sibling
@@ -14,9 +16,11 @@ export default defineConfig(({ mode }) => {
   // Server-side variables (Stripe, service role) for /api in dev; never exposed to the client bundle.
   for (const [k, v] of Object.entries(loadEnv(mode, process.cwd(), ''))) if (!k.startsWith('VITE_') && process.env[k] === undefined) process.env[k] = v
   return {
-    plugins: [react(), tailwindcss(), apiDev(), ...(artifact ? [viteSingleFile()] : [])],
+    plugins: [react(), tailwindcss(), apiDev(), ...(artifact ? [viteSingleFile()] : [fontPreload()])],
     resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     define: { 'import.meta.env.VITE_MEMORY_ROUTER': JSON.stringify(artifact) },
+    // Same headers as production (vercel.json) so e2e tests on `vite preview` prove the CSP holds.
+    preview: { headers: securityHeaders },
     build: {
       target: 'es2022',
       outDir: artifact ? 'dist-artifact' : 'dist',

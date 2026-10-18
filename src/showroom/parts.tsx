@@ -94,7 +94,7 @@ export function PurchaseButton({
           }}
         >
           {config.purchaseLabel}
-          <span className="meta rounded-full bg-black/10 px-2 py-0.5 text-[0.65rem]">Demo</span>
+          <span className="meta rounded-full bg-black/10 px-2 py-0.5 text-[0.75rem]">Demo</span>
         </button>
         <span id={`demo-buy-${config.slug}`} role="status" className={`max-w-xs text-xs leading-snug ${explained ? '' : 'sr-only'}`}>
           Demo link: in a real showroom this button opens the brand’s own store. Nothing is sold here.

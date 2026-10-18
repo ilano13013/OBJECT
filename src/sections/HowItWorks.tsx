@@ -46,7 +46,7 @@ export function HowItWorks() {
   return (
     <section ref={root} id="how" aria-labelledby="how-title" className="gutter relative bg-porcelain py-28 text-obsidian md:py-40">
       <h2 id="how-title" className="display max-w-[14ch] text-[clamp(2.4rem,7vw,6.5rem)]">
-        Ten minutes <span className="serif-accent">to</span> unforgettable.
+        Ten minutes to unforgettable.
       </h2>
       <p className="mt-6 max-w-md text-[#3c3c41]">
         With your images and product details ready, a first showroom takes less time than a coffee.

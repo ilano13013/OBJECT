@@ -30,8 +30,8 @@ const QUESTIONS = [
 export function Faq() {
   return (
     <section id="faq" aria-labelledby="faq-title" className="gutter grid gap-12 py-28 md:grid-cols-12 md:py-40">
-      <h2 id="faq-title" className="display text-[clamp(2.4rem,6vw,5.5rem)] md:col-span-4">
-        Fair <span className="serif-accent text-silver">questions.</span>
+      <h2 id="faq-title" className="display text-[clamp(2.4rem,6vw,5.5rem)] md:col-span-12">
+        Fair <span className="text-silver">questions.</span>
       </h2>
       <div className="md:col-span-7 md:col-start-6">
         {QUESTIONS.map(({ q, a }) => (

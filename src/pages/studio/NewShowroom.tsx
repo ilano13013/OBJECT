@@ -70,7 +70,7 @@ export default function NewShowroom() {
                   >
                     <div className="relative aspect-[5/4] overflow-hidden" style={{ background: POSTERS[id].bg }}>
                       <img src={POSTERS[id].src} alt="" className="size-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105" />
-                      <span className="meta absolute bottom-2 left-2 rounded-full bg-obsidian/70 px-2 py-1 text-[10px] text-silver backdrop-blur">Example: {POSTERS[id].demo} demo</span>
+                      <span className="meta absolute bottom-2 left-2 rounded-full bg-obsidian/75 px-2.5 py-1 text-xs text-silver backdrop-blur">Example: {POSTERS[id].demo} demo</span>
                       {active && (
                         <span className="absolute right-3 top-3 grid size-7 place-items-center rounded-full bg-lime text-obsidian">
                           <Check aria-hidden className="size-4" strokeWidth={3} />
@@ -138,7 +138,7 @@ export default function NewShowroom() {
                 setError(null)
               }}
             />
-            <p id="name-error" role="alert" className="text-[13px] text-[#ff9d8f]">
+            <p id="name-error" role="alert" className="text-[13px] text-danger">
               {error}
             </p>
           </fieldset>

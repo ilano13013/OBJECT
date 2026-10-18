@@ -78,7 +78,7 @@ export function Demos() {
     <section ref={root} id="demos" aria-labelledby="demos-title" className="gutter relative py-28 md:py-40" onPointerMove={move}>
       <div className="grid gap-8 md:grid-cols-12">
         <h2 id="demos-title" className="display text-[clamp(2.4rem,7.5vw,7rem)] md:col-span-8">
-          Three worlds. <span className="serif-accent text-silver">one studio.</span>
+          Three worlds. <span className="text-silver">One studio.</span>
         </h2>
         <p className="max-w-sm self-end text-silver md:col-span-4 md:justify-self-end">
           AURA, FORM and MONO are fictional brands we built to show what an OBJECT. showroom can be. They are not customers.

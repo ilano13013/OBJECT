@@ -92,12 +92,12 @@ export function BillingSection() {
       ) : (
         !error && <p className="text-sm text-ash">Loading your plan…</p>
       )}
-      {data?.subscription_status && STATUS_NOTE[data.subscription_status] && <p className="text-sm leading-relaxed text-[#ffcf8f]">{STATUS_NOTE[data.subscription_status]}</p>}
+      {data?.subscription_status && STATUS_NOTE[data.subscription_status] && <p className="text-sm leading-relaxed text-warning">{STATUS_NOTE[data.subscription_status]}</p>}
       {data?.cancel_at_period_end && active && (
         <p className="text-sm text-silver">Studio is cancelled and stays active until the end of the paid period. Then showrooms beyond your purchases are unpublished; drafts are kept.</p>
       )}
       {error && (
-        <p role="alert" className="text-sm text-[#ff9d8f]">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

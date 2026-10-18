@@ -38,7 +38,7 @@ export function Nav() {
         to="/studio"
         className="inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold text-obsidian bg-porcelain transition-colors hover:bg-lime"
       >
-        Start
+        Start<span className="sr-only"> a showroom</span>
       </Link>
     </header>
   )

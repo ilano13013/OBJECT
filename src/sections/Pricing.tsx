@@ -8,7 +8,7 @@ export function Pricing() {
     <section id="pricing" aria-labelledby="pricing-title" className="gutter relative py-28 md:py-40">
       <div className="grid gap-6 md:grid-cols-12">
         <h2 id="pricing-title" className="display text-[clamp(2.4rem,7vw,6.5rem)] md:col-span-7">
-          Pay for <span className="serif-accent text-silver">what you</span> show.
+          Pay for <span className="text-silver">what you</span> show.
         </h2>
         <p className="max-w-sm self-end text-silver md:col-span-5 md:justify-self-end">
           No setup fee, no commission on your sales. Purchases happen on your own store.

@@ -210,7 +210,7 @@ function EditorInner({ showroom }: { showroom: StudioShowroom }) {
             onClick={() => setDialog({ kind: 'live' })}
             className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-porcelain px-4 text-sm font-semibold text-obsidian hover:bg-white"
           >
-            <span className="size-2 rounded-full bg-[#3ccf6e]" aria-hidden /> Live
+            <span className="size-2 rounded-full bg-success" aria-hidden /> Live
           </button>
         ) : (
           <button
@@ -364,7 +364,7 @@ function SaveStatus({ save, status, changed }: { save: SaveState; status: Studio
         <LoaderCircle aria-hidden className="size-3 animate-spin" /> Saving…
       </span>
     ) : save.kind === 'error' ? (
-      <span className="inline-flex items-center gap-1.5 text-[#ff9d8f]">
+      <span className="inline-flex items-center gap-1.5 text-danger">
         <CircleAlert aria-hidden className="size-3" /> {save.message}
       </span>
     ) : (
@@ -509,7 +509,7 @@ function IssuesBody({ issues, showroomId, onClose }: { issues: PublishIssue[]; s
       <ul className="mt-4 space-y-2">
         {issues.map((i) => (
           <li key={i.message} className="flex gap-2 text-sm">
-            <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-[#ff9d8f]" />
+            <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-danger" />
             {i.message}
           </li>
         ))}
@@ -564,7 +564,7 @@ function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpub
         {confirm ? (
           <span className="flex items-center gap-2 text-sm">
             Take it offline?
-            <button type="button" onClick={() => void onUnpublish()} className="min-h-11 cursor-pointer rounded-full bg-[#ff9d8f] px-4 font-semibold text-obsidian">
+            <button type="button" onClick={() => void onUnpublish()} className="min-h-11 cursor-pointer rounded-full bg-danger px-4 font-semibold text-obsidian">
               Unpublish
             </button>
             <button type="button" onClick={() => setConfirm(false)} className="min-h-11 cursor-pointer px-2 text-ash hover:text-porcelain">
@@ -588,10 +588,10 @@ function DangerZone({ showroom, onDeleted }: { showroom: StudioShowroom; onDelet
   return (
     <div className="p-5">
       {confirm ? (
-        <div className="space-y-3 rounded-lg p-4 ring-1 ring-inset ring-[#ff9d8f]/40">
+        <div className="space-y-3 rounded-lg p-4 ring-1 ring-inset ring-danger/40">
           <p className="text-sm">Delete “{showroom.draft.productName || 'Untitled'}” and its files? {showroom.status === 'published' && 'Its public link stops working.'} This can’t be undone.</p>
           {deleteError && (
-            <p role="alert" className="text-sm text-[#ff9d8f]">
+            <p role="alert" className="text-sm text-danger">
               {deleteError}
             </p>
           )}
@@ -609,7 +609,7 @@ function DangerZone({ showroom, onDeleted }: { showroom: StudioShowroom; onDelet
                   setDeleting(false)
                 }
               }}
-              className="min-h-11 cursor-pointer rounded-full bg-[#ff9d8f] px-4 text-sm font-semibold text-obsidian disabled:cursor-wait disabled:opacity-70"
+              className="min-h-11 cursor-pointer rounded-full bg-danger px-4 text-sm font-semibold text-obsidian disabled:cursor-wait disabled:opacity-70"
             >
               {deleting ? 'Deleting…' : 'Delete showroom'}
             </button>
@@ -619,7 +619,7 @@ function DangerZone({ showroom, onDeleted }: { showroom: StudioShowroom; onDelet
           </div>
         </div>
       ) : (
-        <button type="button" onClick={() => setConfirm(true)} className="min-h-11 cursor-pointer text-sm text-ash hover:text-[#ff9d8f]">
+        <button type="button" onClick={() => setConfirm(true)} className="min-h-11 cursor-pointer text-sm text-ash hover:text-danger">
           Delete this showroom…
         </button>
       )}

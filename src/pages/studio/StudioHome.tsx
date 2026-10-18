@@ -105,7 +105,7 @@ export default function StudioHome() {
           </p>
         )}
         {actionError && (
-          <p role="alert" className="mt-6 text-sm text-[#ff9d8f]">
+          <p role="alert" className="mt-6 text-sm text-danger">
             {actionError}
           </p>
         )}
@@ -154,7 +154,7 @@ export default function StudioHome() {
                       {views ? `${views[s.id]?.views ?? 0} views · 30 days` : 'Views recorded once accounts are on'}
                     </p>
                   </div>
-                  <span className={`meta shrink-0 rounded-full px-2.5 py-1 ${s.status === 'published' ? 'bg-[#3ccf6e]/15 text-[#7fe3a1]' : 'bg-white/5 text-silver'}`}>
+                  <span className={`meta shrink-0 rounded-full px-2.5 py-1 ${s.status === 'published' ? 'bg-success/15 text-success-soft' : 'bg-white/5 text-silver'}`}>
                     {s.status === 'published' ? 'Live' : 'Draft'}
                   </span>
                 </div>
@@ -180,7 +180,7 @@ export default function StudioHome() {
                   </button>
                   {confirm === s.id ? (
                     <span className="ml-auto inline-flex items-center gap-1">
-                      <button type="button" disabled={busy === s.id} onClick={() => act(s.id, () => backend.remove(s.id))} className="min-h-10 cursor-pointer rounded-md bg-[#ff9d8f] px-3 font-semibold text-obsidian">
+                      <button type="button" disabled={busy === s.id} onClick={() => act(s.id, () => backend.remove(s.id))} className="min-h-10 cursor-pointer rounded-md bg-danger px-3 font-semibold text-obsidian">
                         Delete
                       </button>
                       <button type="button" onClick={() => setConfirm(null)} className="min-h-10 cursor-pointer px-2 text-ash hover:text-porcelain">
@@ -192,7 +192,7 @@ export default function StudioHome() {
                       type="button"
                       onClick={() => setConfirm(s.id)}
                       aria-label={`Delete ${s.draft.productName || 'Untitled'}`}
-                      className="ml-auto inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-ash hover:bg-[#ff9d8f]/10 hover:text-[#ff9d8f]"
+                      className="ml-auto inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-ash hover:bg-danger/10 hover:text-danger"
                     >
                       <Trash2 aria-hidden className="size-4" />
                     </button>

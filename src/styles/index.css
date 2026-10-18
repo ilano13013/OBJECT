@@ -18,6 +18,13 @@
   /* Secondary text on obsidian: silver at reduced strength, still ≥ 4.5:1. */
   --color-ash: #8e9297;
   --color-hairline: rgb(191 195 200 / 0.16);
+  /* Semantic states (UI only; never used for showroom identity) */
+  --color-danger: #ff9d8f;
+  --color-danger-soft: #ffb8ad;
+  --color-success: #3ccf6e;
+  --color-success-soft: #7fe3a1;
+  --color-success-ink: #9ae9b5;
+  --color-warning: #ffcf8f;
 
   --font-display: 'Archivo Variable', 'Archivo', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter Tight Variable', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
@@ -103,6 +110,12 @@
     letter-spacing: -0.04em;
     line-height: 0.86;
     text-transform: uppercase;
+  }
+  @media (max-width: 520px) {
+    .display {
+      font-variation-settings: 'wdth' 100;
+      letter-spacing: -0.03em;
+    }
   }
   .display-narrow {
     font-family: var(--font-display);

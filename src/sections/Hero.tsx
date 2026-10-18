@@ -1,4 +1,5 @@
 import { lazy, Suspense, useRef } from 'react'
+import { useIdle } from '@/lib/useDeferred'
 import { LinkButton } from '@/components/Button'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { useReducedMotion } from '@/lib/useReducedMotion'
@@ -22,14 +23,15 @@ export function Hero() {
   const root = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
   const mobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches
+  // The 3D engine waits for the browser to be idle, so text and CTAs paint and respond first.
+  const ready = useIdle(1500)
 
   useGSAP(
     () => {
       if (reduced) return
-      const tl = gsap.timeline({ delay: 0.35 })
-      tl.from('[data-hero-line]', { yPercent: 105, duration: 1.5, stagger: 0.12, ease: 'expo.out' })
-      // The offer and CTAs start almost visible and never wait on the headline.
-      gsap.from('[data-hero-fade]', { opacity: 0.15, y: 14, filter: 'blur(6px)', duration: 1.2, stagger: 0.08, delay: 0.6 })
+      // Everything is readable on the first frame (fast LCP); motion settles it into place.
+      gsap.from('[data-hero-line]', { yPercent: 22, filter: 'blur(14px)', letterSpacing: '0.02em', duration: 1.6, stagger: 0.12, ease: 'expo.out' })
+      gsap.from('[data-hero-fade]', { y: 12, duration: 1.2, stagger: 0.08, delay: 0.3 })
       // Leaving the hero: the type drifts apart as the next chapter arrives.
       gsap.to('[data-hero-a]', { xPercent: -8, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } })
       gsap.to('[data-hero-b]', { xPercent: 8, ease: 'none', scrollTrigger: { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true } })
@@ -43,9 +45,11 @@ export function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_45%,#1c1c20_0%,#09090b_70%)]" />
       <div data-hero-canvas className="absolute inset-0 z-[1]">
         {hasWebGL() ? (
-          <Suspense fallback={null}>
-            <HeroCanvas reduced={reduced} mobile={mobile} fallback={<HeroFallback />} />
-          </Suspense>
+          ready && (
+            <Suspense fallback={null}>
+              <HeroCanvas reduced={reduced} mobile={mobile} fallback={<HeroFallback />} />
+            </Suspense>
+          )
         ) : (
           <HeroFallback />
         )}

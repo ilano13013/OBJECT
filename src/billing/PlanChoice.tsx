@@ -50,7 +50,7 @@ export function PlanChoice({ showroomId }: { showroomId: string }) {
         </span>
       </button>
       {error && (
-        <p role="alert" className="text-sm text-[#ff9d8f]">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

@@ -28,7 +28,7 @@ export function AuthShell({ title, children }: { title: ReactNode; children: Rea
 
 export function Notice({ tone = 'info', children }: { tone?: 'info' | 'error' | 'success'; children: ReactNode }) {
   const cls =
-    tone === 'error' ? 'bg-[#ff9d8f]/10 text-[#ffb8ad]' : tone === 'success' ? 'bg-[#3ccf6e]/10 text-[#9ae9b5]' : 'bg-white/5 text-silver'
+    tone === 'error' ? 'bg-danger/10 text-danger-soft' : tone === 'success' ? 'bg-success/10 text-success-ink' : 'bg-white/5 text-silver'
   return (
     <p role={tone === 'error' ? 'alert' : 'status'} className={`rounded-md p-3 text-sm leading-relaxed ${cls}`}>
       {children}

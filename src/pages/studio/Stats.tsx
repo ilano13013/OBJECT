@@ -85,7 +85,7 @@ export default function Stats() {
           </div>
         )}
         {error && (
-          <p role="alert" className="text-[#ff9d8f]">
+          <p role="alert" className="text-danger">
             {error}
           </p>
         )}

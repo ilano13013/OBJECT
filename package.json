@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "OBJECT. — the immersive product studio. Don't just show it. Make it unforgettable.",
+  "description": "OBJECT. \u2014 the immersive product studio. Don't just show it. Make it unforgettable.",
   "engines": {
     "node": ">=20"
   },
@@ -16,7 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "check": "npm run typecheck && npm run lint && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run test && node scripts/check-headers.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",
@@ -36,6 +36,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "1.56",
     "@tailwindcss/vite": "^4.3.3",

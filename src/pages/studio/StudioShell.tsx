@@ -33,7 +33,7 @@ export function StudioShell({ children, action }: { children: ReactNode; action?
           {storageAvailable() ? (
             <p>Local mode: your showrooms are saved in this browser. Accounts, syncing across devices and payments are coming next. Nothing is charged.</p>
           ) : (
-            <p className="text-[#ffb8ad]">This browser blocks storage (private browsing?). You can try the editor, but nothing will be saved.</p>
+            <p className="text-danger-soft">This browser blocks storage (private browsing?). You can try the editor, but nothing will be saved.</p>
           )}
         </div>
       )}

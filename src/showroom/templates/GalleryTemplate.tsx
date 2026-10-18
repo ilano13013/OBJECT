@@ -139,6 +139,8 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
       <div
         className="absolute inset-x-0 top-0 h-[calc(var(--sr-vh)*68)] touch-pan-y @3xl:inset-0 @3xl:h-auto"
         onPointerDown={(e) => {
+          // Capture so a release outside the stage still ends the drag.
+          e.currentTarget.setPointerCapture?.(e.pointerId)
           dragStart.current = { x: e.clientX, base: drag.current }
         }}
         onPointerMove={(e) => {
@@ -147,6 +149,7 @@ export function GalleryTemplate({ config }: { config: ShowroomConfig }) {
         }}
         onPointerUp={() => (dragStart.current = null)}
         onPointerCancel={() => (dragStart.current = null)}
+        onLostPointerCapture={() => (dragStart.current = null)}
       >
         {show3d ? (
           <SceneCanvas

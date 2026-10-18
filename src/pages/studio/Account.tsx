@@ -76,7 +76,7 @@ export default function Account() {
                   <input id="acc-ws" className={inputClass} value={workspace} maxLength={80} onChange={(e) => (setWorkspace(e.target.value), setStatus(null))} />
                 </div>
                 {error && (
-                  <p role="alert" className="text-sm text-[#ff9d8f]">
+                  <p role="alert" className="text-sm text-danger">
                     {error}
                   </p>
                 )}

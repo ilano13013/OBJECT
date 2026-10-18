@@ -1,4 +1,5 @@
 import { lazy, Suspense, useRef } from 'react'
+import { useNearViewport } from '@/lib/useDeferred'
 import { gsap, useGSAP } from '@/lib/gsap'
 import { useReducedMotion } from '@/lib/useReducedMotion'
 
@@ -33,6 +34,8 @@ export function Story() {
   const root = useRef<HTMLElement>(null)
   const progress = useRef(0)
   const reduced = useReducedMotion()
+  // The scroll film's 3D starts loading only when the section is a screen away.
+  const near = useNearViewport(root)
 
   useGSAP(
     () => {
@@ -81,6 +84,7 @@ export function Story() {
       <div data-story-pin className={`relative overflow-hidden bg-obsidian ${reduced ? 'min-h-[100svh] pb-24' : 'h-[100svh]'}`}>
         <div className="absolute inset-0 bg-[radial-gradient(50%_60%_at_60%_50%,#1a1712_0%,#09090b_70%)]" />
         <Suspense fallback={null}>
+          {near && (
           <StoryCanvas
             progress={progress}
             fallback={
@@ -89,6 +93,7 @@ export function Story() {
               </div>
             }
           />
+          )}
         </Suspense>
 
         {CALLOUTS.map((c) => (
@@ -110,15 +115,12 @@ export function Story() {
           }`}
         >
           <div className={`relative max-w-xl ${reduced ? 'flex flex-col gap-16' : 'grid'}`}>
-            {CHAPTERS.map((c, i) => (
+            {CHAPTERS.map((c) => (
               <div
                 key={c.title}
                 data-chapter
                 className={reduced ? '' : 'col-start-1 row-start-1'}
               >
-                <p className="meta mb-4 text-ash">
-                  {String(i + 1).padStart(2, '0')} / {String(CHAPTERS.length).padStart(2, '0')}
-                </p>
                 <h3 className="display text-[clamp(2.4rem,7vw,6rem)]">{c.title}</h3>
                 <p className="mt-5 max-w-sm text-base leading-relaxed text-silver md:text-lg">{c.body}</p>
               </div>
