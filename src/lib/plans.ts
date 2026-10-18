@@ -15,7 +15,7 @@ export interface Plan {
   limits: string[]
 }
 
-export const STUDIO_DEFAULT_QUOTA = { showrooms: 5, storageMb: 1024, uploadMb: 50 }
+export const STUDIO_DEFAULT_QUOTA = { showrooms: 5, storageMb: 1024, uploadMb: 50, aiGenerations: 5 }
 export const ONE_LIMITS = { storageMb: 200, uploadMb: 50 }
 
 export const PLANS: Plan[] = [
@@ -50,6 +50,7 @@ export const PLANS: Plan[] = [
       `Up to ${STUDIO_DEFAULT_QUOTA.showrooms} published showrooms (quota adjustable)`,
       'Unlimited drafts',
       'All templates and both modes',
+      `Up to ${STUDIO_DEFAULT_QUOTA.aiGenerations} AI 3D models from photos per month`,
       '7- and 30-day statistics per showroom',
       'Billing portal: change or cancel anytime',
     ],

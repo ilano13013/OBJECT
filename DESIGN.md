@@ -63,5 +63,6 @@ cards. Radius is reserved for pills (buttons, badges) and is otherwise ~0.
 - Demo brands carry a persistent "fictional brand" notice and a purchase
   button labelled **Demo** that never leaves the site.
 - Every showroom shows a **True 3D** or **Photo Motion** badge. Photo Motion
-  is never described as 3D. There is no photo-to-3D conversion.
+  is never described as 3D. Photo → 3D happens only through the AI
+  generator (a real model file from Tripo), never by relabelling a photo.
 - Demo imagery is rendered from the procedural models and described as such.

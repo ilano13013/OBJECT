@@ -45,3 +45,33 @@ export function readEnv(source: Record<string, string | undefined> = process.env
   if (!/^https?:\/\//.test(env.appUrl)) throw new ConfigError('APP_URL must be the full site address.')
   return env
 }
+
+/** Configuration of the AI generation endpoints (Tripo). Independent of Stripe. */
+export interface AiEnv {
+  tripoApiKey: string
+  /** Tripo OpenAPI base (v2 task API). Overridable for tests. */
+  tripoApiBase: string
+  /** Model version sent to Tripo. Default H3.1. */
+  tripoModelVersion: string
+  supabaseUrl: string
+  supabaseServiceKey: string
+  appUrl: string
+}
+
+export function readAiEnv(source: Record<string, string | undefined> = process.env): AiEnv {
+  const need = (k: string, what = 'AI generation is not configured') => {
+    const v = source[k]
+    if (!v) throw new ConfigError(`${what}: missing ${k}.`)
+    return v
+  }
+  const env: AiEnv = {
+    tripoApiKey: need('TRIPO_API_KEY'),
+    tripoApiBase: (source.TRIPO_API_BASE || 'https://api.tripo3d.ai/v2/openapi').replace(/\/+$/, ''),
+    tripoModelVersion: source.TRIPO_MODEL_VERSION || 'v3.1-20260211',
+    supabaseUrl: source.SUPABASE_URL || need('VITE_SUPABASE_URL'),
+    supabaseServiceKey: need('SUPABASE_SERVICE_ROLE_KEY'),
+    appUrl: need('APP_URL').replace(/\/+$/, ''),
+  }
+  if (!/^https?:\/\//.test(env.tripoApiBase)) throw new ConfigError('TRIPO_API_BASE must be a full URL.')
+  return env
+}

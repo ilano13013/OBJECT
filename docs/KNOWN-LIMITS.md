@@ -32,7 +32,7 @@
 - Demo products are procedural Three.js models, not scans or photographs.
   The FORM "photos" are renders of that model, used to demonstrate Photo
   Motion mode.
-- OBJECT. does not convert photos to 3D, and the site never claims it does.
+- Photo Motion never converts photos to 3D. Real photo → 3D generation exists only as the AI generator (Tripo, Studio subscribers, 5 per month); its output is an estimate the merchant must check. See docs/TRIPO.md.
 
 ## Technical
 - The 3D chunk is ~400 KB gzip (Three.js + R3F + Drei + a 110 KB HDRI). It is

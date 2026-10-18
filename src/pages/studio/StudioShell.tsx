@@ -14,9 +14,14 @@ export function StudioShell({ children, action }: { children: ReactNode; action?
           <Link to="/" aria-label="OBJECT. home" className="text-lg md:text-xl">
             <Wordmark />
           </Link>
-          <Link to="/studio" className="meta text-ash hover:text-porcelain">
-            Studio
-          </Link>
+          <nav aria-label="Studio" className="flex items-center gap-4">
+            <Link to="/studio" className="meta text-ash hover:text-porcelain">
+              Studio
+            </Link>
+            <Link to="/studio/library" className="meta text-ash hover:text-porcelain">
+              Library
+            </Link>
+          </nav>
         </div>
         <div className="flex items-center gap-2">
           {action}

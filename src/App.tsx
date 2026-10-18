@@ -11,6 +11,7 @@ const StudioPreview = lazy(() => import('./pages/studio/StudioPreview'))
 const PublicShowroom = lazy(() => import('./pages/PublicShowroom'))
 const Stats = lazy(() => import('./pages/studio/Stats'))
 const Account = lazy(() => import('./pages/studio/Account'))
+const Library = lazy(() => import('./pages/studio/Library'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const AuthCallback = lazy(() => import('./pages/auth/AuthCallback'))
 const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'))
@@ -34,6 +35,7 @@ const router = createRouter([
   { path: '/create', element: <Navigate to="/studio/new" replace /> },
   { path: '/studio', element: p(<StudioHome />) },
   { path: '/studio/new', element: p(<NewShowroom />) },
+  { path: '/studio/library', element: p(<Library />) },
   { path: '/studio/:id', element: p(<Editor />) },
   { path: '/studio/:id/preview', element: p(<StudioPreview />) },
   { path: '/studio/:id/stats', element: p(<Stats />) },

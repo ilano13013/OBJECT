@@ -4,7 +4,8 @@ import { defineConfig, devices } from '@playwright/test'
  * End-to-end tests in cloud mode, against a Supabase-compatible stack
  * (supabase/local-stack/start.sh) or a disposable Supabase project.
  * Requires SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
- * TEST_DATABASE_URL (operator actions) and stripe-mock on 127.0.0.1:12111.
+ * TEST_DATABASE_URL (operator actions), stripe-mock on 127.0.0.1:12111 and
+ * the Tripo test double (node scripts/tripo-mock.mjs) on 127.0.0.1:12122.
  */
 const chromiumArgs = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 const executablePath = process.env.CHROMIUM_PATH || (process.env.CI ? undefined : '/opt/pw-browsers/chromium')
@@ -34,7 +35,13 @@ export default defineConfig({
       STRIPE_API_HOST: process.env.STRIPE_API_HOST ?? '127.0.0.1',
       STRIPE_API_PORT: process.env.STRIPE_API_PORT ?? '12111',
       STRIPE_API_PROTOCOL: 'http',
+      // Tripo TEST DOUBLE (scripts/tripo-mock.mjs): returns a fixture cube, generates nothing.
+      TRIPO_API_KEY: 'tsk_test_mock',
+      TRIPO_API_BASE: process.env.TRIPO_API_BASE ?? 'http://127.0.0.1:12122/v2/openapi',
     },
   },
-  projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'], launchOptions: { args: chromiumArgs, executablePath } } }],
+  projects: [
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], launchOptions: { args: chromiumArgs, executablePath } } },
+    { name: 'mobile', testMatch: /ai\.spec\.ts/, use: { ...devices['iPhone 13'], browserName: 'chromium', launchOptions: { args: chromiumArgs, executablePath } } },
+  ],
 })

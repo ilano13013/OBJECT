@@ -7,7 +7,7 @@ const QUESTIONS = [
   },
   {
     q: 'Can I use a simple photo?',
-    a: 'Yes. In Photo Motion mode your images are animated with depth, parallax and light effects. It is still a 2D image. We never present a photo as a 3D model, and OBJECT. does not convert photos into 3D.',
+    a: 'Yes. In Photo Motion mode your images are animated with depth, parallax and light effects. It is still a 2D image, and we never present a photo as a 3D model. Studio subscribers can also generate a real 3D model from their photos with AI (up to 5 per month), to check before publishing.',
   },
   {
     q: 'Can I import a 3D model?',

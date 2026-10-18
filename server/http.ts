@@ -4,6 +4,8 @@ export class HttpError extends Error {
   constructor(
     public status: number,
     message: string,
+    /** Stable machine-readable reason the client can branch on. */
+    public code?: string,
   ) {
     super(message)
   }
@@ -45,7 +47,7 @@ export function handle(fn: (req: Request) => Promise<Response>) {
     try {
       return await fn(req)
     } catch (e) {
-      if (e instanceof HttpError) return json({ error: e.message }, e.status)
+      if (e instanceof HttpError) return json(e.code ? { error: e.message, code: e.code } : { error: e.message }, e.status)
       if (e instanceof ConfigError) return json({ error: e.message }, 503)
       console.error('[api] unexpected error', e)
       return json({ error: 'Something went wrong on our side. Try again in a moment.' }, 500)

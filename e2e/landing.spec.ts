@@ -24,7 +24,7 @@ test.describe('landing', () => {
     const q = page.getByText('Can I use a simple photo?')
     await q.scrollIntoViewIfNeeded()
     await q.click()
-    await expect(page.getByText(/does not convert photos into 3D/i)).toBeVisible()
+    await expect(page.getByText(/we never present a photo as a 3D model/i)).toBeVisible()
   })
 
   test('renders a WebGL canvas when supported', async ({ page }) => {

@@ -1,7 +1,8 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 import type { ServerEnv } from './env'
 import { HttpError } from './http'
+import { adminClient, currentUser as userFromToken, workspaceOf as workspaceOfUser, type Workspace } from './identity'
 
 export interface BillingDeps {
   env: ServerEnv
@@ -15,27 +16,11 @@ export function makeDeps(env: ServerEnv): BillingDeps {
     timeout: 15_000,
     ...(env.stripeApiHost ? { host: env.stripeApiHost, port: env.stripeApiPort, protocol: env.stripeApiProtocol } : {}),
   })
-  const db = createClient(env.supabaseUrl, env.supabaseServiceKey, { auth: { persistSession: false, autoRefreshToken: false } })
-  return { env, stripe, db }
+  return { env, stripe, db: adminClient(env.supabaseUrl, env.supabaseServiceKey) }
 }
 
-interface Workspace {
-  id: string
-  stripe_customer_id: string | null
-}
-
-/** Resolves the signed-in user from their Supabase access token (verified by Supabase Auth). */
-async function currentUser(deps: BillingDeps, token: string) {
-  const { data, error } = await deps.db.auth.getUser(token)
-  if (error || !data.user) throw new HttpError(401, 'Your session has expired. Sign in again.')
-  return data.user
-}
-
-async function workspaceOf(deps: BillingDeps, userId: string): Promise<Workspace> {
-  const { data, error } = await deps.db.from('workspaces').select('id, stripe_customer_id').eq('owner_id', userId).order('created_at').limit(1).single()
-  if (error || !data) throw new HttpError(404, 'No studio found for this account.')
-  return data as Workspace
-}
+const currentUser = (deps: BillingDeps, token: string) => userFromToken(deps.db, token)
+const workspaceOf = (deps: BillingDeps, userId: string) => workspaceOfUser(deps.db, userId)
 
 async function ensureCustomer(deps: BillingDeps, ws: Workspace, email: string | undefined): Promise<string> {
   if (ws.stripe_customer_id) return ws.stripe_customer_id
@@ -138,10 +123,12 @@ async function workspaceForCustomer(deps: BillingDeps, customer: string | Stripe
   return (data?.id as string) ?? null
 }
 
-function periodEnd(sub: Stripe.Subscription): string | null {
-  const legacy = (sub as unknown as { current_period_end?: number }).current_period_end
-  const item = sub.items?.data?.[0] as unknown as { current_period_end?: number } | undefined
-  const ts = item?.current_period_end ?? legacy
+/** Stripe moved the period from the subscription to its items (API 2025-03); read both. */
+function period(sub: Stripe.Subscription, edge: 'start' | 'end'): string | null {
+  const key = `current_period_${edge}` as const
+  const legacy = (sub as unknown as Record<string, number | undefined>)[key]
+  const item = sub.items?.data?.[0] as unknown as Record<string, number | undefined> | undefined
+  const ts = item?.[key] ?? legacy
   return ts ? new Date(ts * 1000).toISOString() : null
 }
 
@@ -157,7 +144,9 @@ async function syncSubscription(deps: BillingDeps, sub: Stripe.Subscription) {
       stripe_customer_id: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
       stripe_subscription_id: sub.id,
       status: sub.status,
-      current_period_end: periodEnd(sub),
+      // A new period (renewal) also starts a fresh AI generation quota.
+      current_period_start: period(sub, 'start'),
+      current_period_end: period(sub, 'end'),
       cancel_at_period_end: sub.cancel_at_period_end,
     },
     { onConflict: 'workspace_id' },

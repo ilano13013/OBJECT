@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Box, Check, Images, Plus, Trash2, Upload, X } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { LibraryPicker } from '@/ai/LibraryPicker'
 import { contrastRatio } from '@/lib/color'
 import { safeExternalUrl, slugify } from '@/lib/url'
 import type { FontId, ShowroomChapter, ShowroomConfig, ShowroomFeature, TemplateId } from '@/showroom/types'
@@ -204,8 +205,8 @@ export function MediaPanel({ showroom, draft, update }: PanelProps) {
       />
       <p className="text-[13px] leading-relaxed text-ash">
         {draft.mode === 'photo'
-          ? 'Your photos are animated with depth, parallax and light. They stay 2D images: OBJECT. never turns a photo into a 3D model.'
-          : 'Visitors turn a real 3D model of your product. Upload a .glb file (or a self-contained .gltf). Photos below are used for the poster and if a device cannot show 3D.'}
+          ? 'Your photos are animated with depth, parallax and light. They stay 2D images, never presented as a 3D model.'
+          : 'Visitors turn a real 3D model of your product. Upload a .glb file (or a self-contained .gltf), or use one from your library. Photos below are used for the poster and if a device cannot show 3D.'}
       </p>
 
       {draft.mode === 'true3d' && (
@@ -234,6 +235,18 @@ export function MediaPanel({ showroom, draft, update }: PanelProps) {
           <div className="pt-1">
             <UploadButton label={draft.model ? 'Replace model' : 'Upload a model'} accept=".glb,.gltf,model/gltf-binary,model/gltf+json" onFiles={setModel} busy={busy} />
           </div>
+          {backend.mode === 'cloud' && (
+            <LibraryPicker
+              showroomId={showroom.id}
+              disabled={busy}
+              onPicked={(key, name) => {
+                const previous = draft.model
+                update((d) => ({ ...d, model: { kind: 'upload', assetId: key, name } }))
+                if (previous?.kind === 'upload' && !usedByPublished(showroom, previous.assetId)) deleteAsset(previous.assetId).catch(() => undefined)
+                setErrors([])
+              }}
+            />
+          )}
         </Field>
       )}
 
