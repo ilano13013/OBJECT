@@ -135,7 +135,7 @@ export default function Library() {
         </div>
 
         {mode === 'local' || !aiAvailable ? (
-          <p className="max-w-[62ch] rounded-xl p-6 text-silver ring-1 ring-inset ring-hairline">AI generation and the model library need an OBJECT. account. They aren’t connected on this site yet.</p>
+          <p className="max-w-[62ch] rounded-xl p-6 text-silver ring-1 ring-inset ring-hairline">AI generation needs the online version of OBJECT.: an account, an active Studio subscription and the secure server that talks to Tripo. This copy of the site runs without them, so nothing can be generated here. Your showrooms stay in this browser.</p>
         ) : (
           <>
             <AiGenerator models={models ?? []} onModelReady={reload} renderUse={(m) => <AddToShowroom model={m} />} />

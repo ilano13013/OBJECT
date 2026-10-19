@@ -1,4 +1,4 @@
-import { BarChart3, Copy, ExternalLink, Pencil, Plus, Trash2 } from 'lucide-react'
+import { ArrowRight, BarChart3, Copy, ExternalLink, Pencil, Plus, Sparkles, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { fontClass } from '@/showroom/parts'
@@ -104,6 +104,19 @@ export default function StudioHome() {
             · <Link to="/account" className="underline underline-offset-4">Account</Link>
           </p>
         )}
+        <Link
+          to="/studio/library"
+          className="group mt-8 flex max-w-2xl items-center gap-4 rounded-xl bg-graphite/50 p-4 ring-1 ring-inset ring-hairline transition-colors hover:ring-lime/50 md:p-5"
+        >
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-lime text-obsidian">
+            <Sparkles aria-hidden className="size-5" />
+          </span>
+          <span className="grid min-w-0 flex-1 gap-0.5">
+            <span className="text-[15px] font-semibold tracking-tight">Generate a 3D model with AI</span>
+            <span className="text-[13px] text-ash">From photos of your product, straight into your showrooms. Studio subscribers: 5 per month.</span>
+          </span>
+          <ArrowRight aria-hidden className="size-5 shrink-0 text-silver transition-transform group-hover:translate-x-1" />
+        </Link>
         {actionError && (
           <p role="alert" className="mt-6 text-sm text-danger">
             {actionError}
