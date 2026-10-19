@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ShowroomConfig } from '@/showroom/types'
 import { createStarterConfig, withDefaults } from '../starters'
 import type { AssetKind, StudioShowroom } from '../types'
-import type { Entitlement, PublishResult, SlugResult, StatsDay, StudioBackend } from './types'
+import type { Entitlement, GalleryItem, GalleryQuery, PublishResult, SlugResult, StatsDay, StudioBackend } from './types'
 
 const BUCKET = 'showroom-assets'
 
@@ -22,6 +22,7 @@ interface ShowroomRow {
   created_at: string
   updated_at: string
   published_at: string | null
+  listed: boolean
   showroom_content:
     | { settings_json: Partial<ShowroomConfig>; published_json: Partial<ShowroomConfig> | null; updated_at: string }
     | { settings_json: Partial<ShowroomConfig>; published_json: Partial<ShowroomConfig> | null; updated_at: string }[]
@@ -43,12 +44,13 @@ function toShowroom(row: ShowroomRow): StudioShowroom {
     createdAt: row.created_at,
     updatedAt: contentUpdated > row.updated_at ? contentUpdated : row.updated_at,
     publishedAt: row.published_at,
+    listed: row.listed,
     draft: withDefaults({ ...content?.settings_json, slug: row.slug }, fallback),
     published: content?.published_json ? withDefaults({ ...content.published_json, slug: row.slug }, fallback) : null,
   }
 }
 
-const SELECT = 'id, slug, status, template, created_at, updated_at, published_at, showroom_content(settings_json, published_json, updated_at)'
+const SELECT = 'id, slug, status, template, created_at, updated_at, published_at, listed, showroom_content(settings_json, published_json, updated_at)'
 
 /** A random id per browser session: counts unique visitors without cookies or fingerprints. */
 function visitorId(): string | null {
@@ -154,6 +156,31 @@ export class CloudBackend implements StudioBackend {
     const { error } = await this.sb.rpc('unpublish_showroom', { p_id: id })
     if (error) fail(error)
     this.emit()
+  }
+
+  async setListed(id: string, listed: boolean) {
+    const { error } = await this.sb.rpc('set_showroom_listed', { p_id: id, p_listed: listed })
+    if (error) fail(error, 'Couldn’t change the gallery setting.')
+    this.emit()
+  }
+
+  async gallery({ before = null, query = '', mode = null, limit = 24 }: GalleryQuery): Promise<GalleryItem[]> {
+    const { data, error } = await this.sb.rpc('gallery_showrooms', { p_limit: limit, p_before: before, p_query: query || null, p_mode: mode })
+    if (error) fail(error, 'The gallery could not be loaded.')
+    type Row = { slug: string; product_name: string | null; brand: string | null; tagline: string | null; cover: string | null; cover_alt: string | null; mode: string | null; background: string | null; accent: string | null; text_color: string | null; published_at: string }
+    return (data as Row[]).map((r) => ({
+      slug: r.slug,
+      productName: r.product_name ?? '',
+      brand: r.brand ?? '',
+      tagline: r.tagline ?? '',
+      cover: r.cover,
+      coverAlt: r.cover_alt ?? '',
+      mode: r.mode === 'true3d' ? 'true3d' : 'photo',
+      background: r.background ?? '#09090b',
+      accent: r.accent ?? '#d7ff43',
+      text: r.text_color ?? '#f2f0eb',
+      publishedAt: r.published_at,
+    }))
   }
 
   async duplicate(id: string) {

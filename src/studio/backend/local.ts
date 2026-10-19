@@ -1,6 +1,6 @@
 import { deleteAsset, getAssetBlob, putAsset } from '../assets-idb'
 import { LocalShowroomRepository } from '../repository'
-import type { StudioBackend } from './types'
+import type { GalleryItem, GalleryQuery, StudioBackend } from './types'
 
 
 /** This-browser storage: localStorage for showrooms, IndexedDB for files. */
@@ -27,6 +27,37 @@ export class LocalBackend implements StudioBackend {
   }
   async unpublish(id: string) {
     this.repo.unpublish(id)
+  }
+  async setListed(id: string, listed: boolean) {
+    this.repo.setListed(id, listed)
+  }
+  /** This browser's own listed showrooms (local mode has no shared catalogue). */
+  async gallery({ before, query, mode, limit = 24 }: GalleryQuery): Promise<GalleryItem[]> {
+    const term = query?.trim().toLowerCase()
+    return this.repo
+      .list()
+      .filter((s) => s.status === 'published' && s.listed && s.published && s.publishedAt)
+      .filter((s) => !before || s.publishedAt! < before)
+      .filter((s) => !mode || s.published!.mode === mode)
+      .filter((s) => !term || [s.published!.productName, s.published!.brand, s.published!.tagline].some((t) => t?.toLowerCase().includes(term)))
+      .sort((a, b) => (a.publishedAt! < b.publishedAt! ? 1 : -1))
+      .slice(0, limit)
+      .map((s) => {
+        const p = s.published!
+        return {
+          slug: s.slug,
+          productName: p.productName,
+          brand: p.brand,
+          tagline: p.tagline,
+          cover: p.images[0]?.src ?? null,
+          coverAlt: p.images[0]?.alt ?? '',
+          mode: p.mode,
+          background: p.theme.background,
+          accent: p.theme.accent,
+          text: p.theme.text,
+          publishedAt: s.publishedAt!,
+        }
+      })
   }
   duplicate(id: string) {
     return this.repo.duplicate(id)

@@ -4,6 +4,7 @@ import { AuthProvider, RequireAuth } from './auth/AuthProvider'
 import Landing from './pages/Landing'
 
 const DemoShowroom = lazy(() => import('./pages/DemoShowroom'))
+const Gallery = lazy(() => import('./pages/Gallery'))
 const StudioHome = lazy(() => import('./pages/studio/StudioHome'))
 const NewShowroom = lazy(() => import('./pages/studio/NewShowroom'))
 const Editor = lazy(() => import('./pages/studio/Editor'))
@@ -32,6 +33,7 @@ const createRouter = import.meta.env.VITE_MEMORY_ROUTER ? createMemoryRouter : c
 const router = createRouter([
   { path: '/', element: <Landing /> },
   { path: '/demo/:slug', element: s(<DemoShowroom />) },
+  { path: '/gallery', element: s(<Gallery />) },
   { path: '/create', element: <Navigate to="/studio/new" replace /> },
   { path: '/studio', element: p(<StudioHome />) },
   { path: '/studio/new', element: p(<NewShowroom />) },

@@ -118,6 +118,7 @@ export class LocalShowroomRepository implements ShowroomRepository {
       publishedAt: null,
       draft: createStarterConfig(template, mode, productName, slug),
       published: null,
+      listed: true,
     }
     this.write([showroom, ...this.read()])
     return showroom
@@ -155,6 +156,10 @@ export class LocalShowroomRepository implements ShowroomRepository {
     const now = new Date().toISOString()
     const showroom = this.update(id, (s) => ({ ...s, status: 'published', publishedAt: now, published: clone(s.draft), updatedAt: now }))
     return { ok: true, showroom }
+  }
+
+  setListed(id: string, listed: boolean) {
+    return this.update(id, (s) => ({ ...s, listed }))
   }
 
   unpublish(id: string) {

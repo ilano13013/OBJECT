@@ -15,6 +15,29 @@ export interface Entitlement {
   used: number
 }
 
+/** One card of the public gallery: the published snapshot only. */
+export interface GalleryItem {
+  slug: string
+  productName: string
+  brand: string
+  tagline: string
+  /** First image: an asset ref or a URL; null when the showroom has none (True 3D only). */
+  cover: string | null
+  coverAlt: string
+  mode: MediaMode
+  background: string
+  accent: string
+  text: string
+  publishedAt: string
+}
+
+export interface GalleryQuery {
+  before?: string | null
+  query?: string
+  mode?: MediaMode | null
+  limit?: number
+}
+
 export type SlugResult = { ok: true; slug: string } | { ok: false; error: string }
 export type PublishResult = { ok: true } | { ok: false; issues: PublishIssue[] }
 
@@ -30,6 +53,10 @@ export interface StudioBackend {
   setSlug(id: string, slug: string): Promise<SlugResult>
   publish(id: string): Promise<PublishResult>
   unpublish(id: string): Promise<void>
+  /** Show or hide a showroom in the public gallery. */
+  setListed(id: string, listed: boolean): Promise<void>
+  /** Listed, published showrooms, newest first. */
+  gallery(q: GalleryQuery): Promise<GalleryItem[]>
   duplicate(id: string): Promise<StudioShowroom>
   remove(id: string): Promise<void>
   getPublished(slug: string): Promise<ShowroomConfig | null>

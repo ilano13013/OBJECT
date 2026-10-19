@@ -21,6 +21,9 @@ export function StudioShell({ children, action }: { children: ReactNode; action?
             <Link to="/studio/library" className="meta text-ash hover:text-porcelain">
               Library
             </Link>
+            <Link to="/gallery" className="meta hidden text-ash hover:text-porcelain sm:inline">
+              Gallery
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-2">

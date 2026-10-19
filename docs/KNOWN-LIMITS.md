@@ -47,3 +47,4 @@
   verified on a physical iPhone with Safari/WebKit.
 - `THREE.Clock` deprecation warning comes from React Three Fiber itself and
   is harmless.
+- Gallery (`/gallery`): only published showrooms whose owner keeps “Show in the OBJECT. gallery” on. New showrooms start listed (the switch is shown in the publish dialog); showrooms published before the gallery existed stay unlisted until their owner opts in. No moderation queue yet: an owner can unlist, an operator can set `showrooms.listed = false`.

@@ -10,6 +10,8 @@ export interface StudioShowroom {
   createdAt: string
   updatedAt: string
   publishedAt: string | null
+  /** Shown in the public gallery while published. Missing on showrooms made before the gallery: unlisted. */
+  listed?: boolean
   /** What the editor changes. */
   draft: ShowroomConfig
   /** What visitors see. Only replaced when the merchant publishes again. */

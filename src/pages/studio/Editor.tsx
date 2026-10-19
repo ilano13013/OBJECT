@@ -24,6 +24,7 @@ import { clearBackup, readBackup, writeBackup } from '@/studio/draftBackup'
 import { refreshShowrooms, useShowroom } from '@/studio/store'
 import type { StudioShowroom } from '@/studio/types'
 import { useResolvedConfig } from '@/studio/useResolvedConfig'
+import { Toggle } from '@/studio/ui'
 import type { PublishIssue } from '@/studio/validation'
 import NotFound from '../NotFound'
 import { publicUrl } from './links'
@@ -554,9 +555,12 @@ function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpub
       <p role="status" className="mt-2 text-xs text-ash">
         {copied === 'failed' ? 'Couldn’t copy automatically: the link is selected, copy it with your keyboard.' : ''}
       </p>
-      <p className="mt-3 text-xs leading-relaxed text-ash">
-        Local mode: until accounts open, showrooms are stored in this browser, so the link works on this device only.
-      </p>
+      {backend.mode === 'local' && (
+        <p className="mt-3 text-xs leading-relaxed text-ash">
+          Local mode: until accounts open, showrooms are stored in this browser, so the link works on this device only.
+        </p>
+      )}
+      <GalleryToggle showroom={showroom} />
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <Link to={`/s/${showroom.slug}`} className="inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm ring-1 ring-inset ring-silver/30 hover:ring-porcelain">
           <ExternalLink aria-hidden className="size-4" /> Open showroom
@@ -578,6 +582,39 @@ function LiveBody({ showroom, onUnpublish }: { showroom: StudioShowroom; onUnpub
         )}
       </div>
     </>
+  )
+}
+
+/** Whether this showroom appears in the public gallery (/gallery). */
+function GalleryToggle({ showroom }: { showroom: StudioShowroom }) {
+  const [listed, setListed] = useState(!!showroom.listed)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div className="mt-5 rounded-lg p-4 ring-1 ring-inset ring-hairline">
+      <Toggle
+        label="Show in the OBJECT. gallery"
+        hint="Visitors browsing the gallery can find and open it. Turn it off at any time."
+        checked={listed}
+        onChange={(on) => {
+          setListed(on)
+          setError(null)
+          backend.setListed(showroom.id, on).catch((e: unknown) => {
+            setListed(!on)
+            setError(e instanceof Error ? e.message : 'Couldn’t change the gallery setting.')
+          })
+        }}
+      />
+      {error && (
+        <p role="alert" className="mt-2 text-[13px] text-danger">
+          {error}
+        </p>
+      )}
+      {listed && (
+        <Link to="/gallery" className="mt-2 inline-block text-[13px] text-silver underline underline-offset-4 hover:text-porcelain">
+          See the gallery
+        </Link>
+      )}
+    </div>
   )
 }
 

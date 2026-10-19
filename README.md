@@ -29,7 +29,9 @@ upload, design, publish a shareable link. No code.
 | `/demo/form` | **FORM** Cuff 01: accessory · *Editorial* template · Photo Motion |
 | `/demo/mono` | **MONO** Vessel III: home object · *Gallery* template · True 3D, views, wall colours |
 | `/studio` | My showrooms: drafts and published, duplicate, delete |
+| `/gallery` | Public gallery (Pinterest-style wall) of published showrooms their owners chose to list, plus the labelled demos |
 | `/studio/new` | Onboarding: template → photos or 3D model → product name |
+| `/studio/library` | Model library and AI photo → 3D generation (Studio subscribers) |
 | `/studio/:id` | Editor: settings on the left, live preview (desktop / phone), save status, publish |
 | `/studio/:id/preview` | Full-screen preview of the draft |
 | `/studio/:id/stats` | Views, visitors, purchase clicks, click rate over 7 / 30 days |
