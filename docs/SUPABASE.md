@@ -97,3 +97,31 @@ where owner_id = (select id from auth.users where email = 'vous@exemple.com');
 - `e2e-cloud/` : parcours complets dans un vrai navigateur contre une pile
   compatible Supabase (Auth + PostgREST + Storage), voir
   `supabase/local-stack/start.sh`.
+
+## Connexion Google, Apple et GitHub
+
+L’écran `/login` propose « Continue with Google / Apple / GitHub » et l’e-mail +
+mot de passe. Aucun compte de test n’existe : chaque compte est créé par son
+propriétaire. Un bouton dont le fournisseur n’est pas activé affiche « Sign-in
+with … isn’t switched on for this site yet » (lu depuis `/auth/v1/settings`).
+
+Dans Supabase → **Authentication → URL Configuration** :
+- *Site URL* : `https://<votre-domaine>`
+- *Redirect URLs* : `https://<votre-domaine>/auth/callback`
+
+URL de retour à déclarer chez chaque fournisseur :
+`https://<projet>.supabase.co/auth/v1/callback`
+
+| Fournisseur | Où créer l’application | À coller dans Supabase → Authentication → Sign In / Providers |
+|---|---|---|
+| Google | Google Cloud Console → APIs & Services → Credentials → *OAuth client ID* (type Web) ; écran de consentement en *External* | Client ID + Client secret |
+| GitHub | GitHub → Settings → Developer settings → *OAuth Apps* → New | Client ID + Client secret |
+| Apple | developer.apple.com (compte payant) → Identifiers : un *Services ID* avec *Sign in with Apple*, domaine + URL de retour ; une clé *Sign in with Apple* (.p8) | Services ID, Team ID, Key ID et clé → secret généré par Supabase (à renouveler tous les 6 mois) |
+
+Le flux utilisé est OAuth avec PKCE ; la session est échangée sur
+`/auth/callback`, puis l’utilisateur revient où il allait (`next`, chemin du
+site uniquement). Un compte créé par Google/Apple/GitHub reçoit son espace de
+travail comme un compte e-mail (déclencheur `handle_new_user`).
+
+Pile locale : `GITHUB_CLIENT_ID=… GITHUB_SECRET=… supabase/local-stack/start.sh`
+active GitHub (tests : `e2e-cloud/auth.spec.ts`).

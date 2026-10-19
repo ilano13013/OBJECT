@@ -25,6 +25,9 @@ export GOTRUE_DB_DRIVER=postgres DATABASE_URL="postgres://supabase_auth_admin@$P
   GOTRUE_SITE_URL=${SITE_URL:-http://localhost:5173} API_EXTERNAL_URL=http://127.0.0.1:54321/auth/v1 \
   GOTRUE_API_HOST=127.0.0.1 PORT=9999 GOTRUE_DISABLE_SIGNUP=false GOTRUE_EXTERNAL_EMAIL_ENABLED=true \
   GOTRUE_MAILER_AUTOCONFIRM=true GOTRUE_LOG_LEVEL=warn GOTRUE_URI_ALLOW_LIST='http://localhost:*'
+# Optional OAuth (e.g. GITHUB_CLIENT_ID=… GITHUB_SECRET=…): a provider is on only when its id is given.
+export GOTRUE_EXTERNAL_GITHUB_ENABLED=$([ -n "${GITHUB_CLIENT_ID:-}" ] && echo true || echo false) GOTRUE_EXTERNAL_GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-} \
+  GOTRUE_EXTERNAL_GITHUB_SECRET=${GITHUB_SECRET:-} GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI=http://127.0.0.1:54321/auth/v1/callback
 (cd "$BIN" && ./auth migrate >"$LOGS/auth-migrate.log" 2>&1)
 (cd "$BIN" && nohup ./auth serve >"$LOGS/auth.log" 2>&1 &)
 $P -f "$here/after-auth.sql"

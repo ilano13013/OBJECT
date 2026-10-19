@@ -4,6 +4,7 @@ import { safeNext, sendMagicLink, sendPasswordReset, signIn, signUp } from '@/au
 import { useAuth } from '@/auth/AuthProvider'
 import { inputClass } from '@/studio/ui'
 import { AuthShell, Notice } from './AuthShell'
+import { ProviderButtons } from './ProviderButtons'
 
 type Tab = 'signin' | 'signup'
 
@@ -26,10 +27,12 @@ export default function Login() {
 
   if (mode === 'local') {
     return (
-      <AuthShell title="Accounts open soon">
-        <Notice>This version of OBJECT. runs without accounts: your showrooms are saved in this browser.</Notice>
-        <Link to="/studio" className="inline-flex min-h-12 items-center justify-center rounded-full bg-lime px-6 text-sm font-semibold text-obsidian">
-          Open the studio
+      <AuthShell title="Create your account">
+        <Notice>
+          Accounts live on the online version of OBJECT.: sign up there with Google, Apple, GitHub or an email and a password. This copy of the site isn’t connected to it, so no account can be created here.
+        </Notice>
+        <Link to="/studio" className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-semibold ring-1 ring-inset ring-silver/30 hover:ring-porcelain">
+          Try the studio without an account
         </Link>
       </AuthShell>
     )
@@ -66,7 +69,7 @@ export default function Login() {
   }
 
   return (
-    <AuthShell title={tab === 'signin' ? 'Welcome back' : 'Create your studio'}>
+    <AuthShell title={tab === 'signin' ? 'Welcome back' : 'Create your account'}>
       <div role="tablist" aria-label="Account" className="grid grid-cols-2 gap-1 rounded-lg bg-graphite-2 p-1 ring-1 ring-inset ring-hairline">
         {(['signin', 'signup'] as const).map((t) => (
           <button
@@ -84,6 +87,14 @@ export default function Login() {
             {t === 'signin' ? 'Sign in' : 'Create account'}
           </button>
         ))}
+      </div>
+
+      <ProviderButtons next={next} verb={tab === 'signin' ? 'Continue' : 'Sign up'} onError={(m) => (setInfo(null), setError(m))} />
+
+      <div className="flex items-center gap-3 text-xs text-ash" aria-hidden>
+        <span className="h-px flex-1 bg-hairline" />
+        or with your email
+        <span className="h-px flex-1 bg-hairline" />
       </div>
 
       <form onSubmit={submit} className="grid gap-4" noValidate>
@@ -160,7 +171,7 @@ export default function Login() {
         </div>
       )}
       <p className="text-xs leading-relaxed text-ash">
-        No tracking cookies. We only use your email to sign you in and send account messages.
+        No tracking cookies. We only use your email to sign you in and send account messages. With Google, Apple or GitHub we receive your name and email address, never your password.
       </p>
     </AuthShell>
   )

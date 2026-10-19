@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import { useAuth } from '@/auth/AuthProvider'
 import { Wordmark } from './Wordmark'
 
 const LINKS = [
@@ -18,6 +19,7 @@ export function Nav() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  const { mode, user } = useAuth()
   return (
     <header
       className={`gutter fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between transition-[background-color,backdrop-filter] duration-500 md:h-20 ${
@@ -34,12 +36,25 @@ export function Nav() {
           </a>
         ))}
       </nav>
-      <Link
-        to="/studio"
-        className="inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold text-obsidian bg-porcelain transition-colors hover:bg-lime"
-      >
-        Start<span className="sr-only"> a showroom</span>
-      </Link>
+      {user ? (
+        <Link to="/studio" className="inline-flex min-h-11 items-center rounded-full px-5 text-sm font-semibold text-obsidian bg-porcelain transition-colors hover:bg-lime">
+          Open the studio
+        </Link>
+      ) : (
+        <div className="flex items-center gap-1 sm:gap-3">
+          {mode === 'cloud' && (
+            <Link to="/login" className="hidden min-h-11 items-center px-3 sm:inline-flex text-sm text-silver transition-colors hover:text-porcelain">
+              Sign in
+            </Link>
+          )}
+          <Link
+            to="/login?mode=signup"
+            className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-5 text-sm font-semibold text-obsidian bg-porcelain transition-colors hover:bg-lime"
+          >
+            Create an account
+          </Link>
+        </div>
+      )}
     </header>
   )
 }

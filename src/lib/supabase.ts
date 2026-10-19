@@ -10,6 +10,9 @@ const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
  */
 export const cloudEnabled = !!url && !!anonKey && !import.meta.env.VITE_MEMORY_ROUTER
 
+/** Public project settings (URL + anon key), for endpoints supabase-js does not wrap. */
+export const supabasePublic = cloudEnabled ? { url: url!.replace(/\/+$/, ''), anonKey: anonKey! } : null
+
 export const supabase: SupabaseClient | null = cloudEnabled
   ? createClient(url!, anonKey!, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' },

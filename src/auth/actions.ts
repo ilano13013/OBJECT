@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase, supabasePublic } from '@/lib/supabase'
 
 function client() {
   if (!supabase) throw new Error('Accounts are not connected on this site yet.')
@@ -58,4 +58,29 @@ export async function updatePassword(password: string) {
 
 export async function signOut() {
   await client().auth.signOut()
+}
+
+export type OAuthProvider = 'google' | 'apple' | 'github'
+export const PROVIDER_NAMES: Record<OAuthProvider, string> = { google: 'Google', apple: 'Apple', github: 'GitHub' }
+
+/**
+ * Providers switched on in Supabase Auth (Authentication → Sign In / Providers).
+ * Null when the settings could not be read: the buttons then simply try.
+ */
+export async function enabledProviders(): Promise<Record<OAuthProvider, boolean> | null> {
+  if (!supabasePublic) return null
+  try {
+    const res = await fetch(`${supabasePublic.url}/auth/v1/settings`, { headers: { apikey: supabasePublic.anonKey } })
+    if (!res.ok) return null
+    const { external } = (await res.json()) as { external?: Partial<Record<OAuthProvider, boolean>> }
+    return { google: !!external?.google, apple: !!external?.apple, github: !!external?.github }
+  } catch {
+    return null
+  }
+}
+
+/** Leaves for the provider's consent screen; Supabase brings the user back to /auth/callback. */
+export async function signInWithProvider(provider: OAuthProvider, next: string) {
+  const { error } = await client().auth.signInWithOAuth({ provider, options: { redirectTo: callback(next) } })
+  if (error) throw new Error(friendly(error.message))
 }
