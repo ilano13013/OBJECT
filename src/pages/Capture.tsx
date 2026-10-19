@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 import { Float } from '@react-three/drei'
 import { SceneCanvas } from '@/three/SceneCanvas'
@@ -20,6 +21,11 @@ export default function Capture() {
   const z = Number(q.get('z') ?? 5.6)
   const y = Number(q.get('y') ?? 0)
   const accent = q.get('accent') ?? '#d7ff43'
+  // Cut-outs: let the page itself be transparent so only the product is captured.
+  useEffect(() => {
+    if (bg !== 'transparent') return
+    for (const el of [document.documentElement, document.body]) el.style.setProperty('background', 'transparent', 'important')
+  }, [bg])
   return (
     <div className="fixed inset-0" style={{ background: bg }}>
       <SceneCanvas className="absolute inset-0" label="render" camera={{ position: [0, y, z], fov: 30 }} fallback={null} gl={{ preserveDrawingBuffer: true, antialias: true }}>

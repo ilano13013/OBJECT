@@ -2,6 +2,9 @@ import { ArrowUpRight } from 'lucide-react'
 import auraPoster from '@/assets/renders/aura-poster.webp'
 import formHero from '@/assets/renders/form-hero.webp'
 import monoPoster from '@/assets/renders/mono-poster.webp'
+import auraCutout from '@/assets/renders/aura-cutout.webp'
+import formCutout from '@/assets/renders/form-cutout.webp'
+import monoCutout from '@/assets/renders/mono-cutout.webp'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { gsap, useGSAP } from '@/lib/gsap'
@@ -16,6 +19,7 @@ const ROWS = [
     template: 'Orbit',
     mode: 'True 3D',
     poster: auraPoster,
+    cutout: auraCutout,
     tint: '#e8c9a4',
     line: 'Black, chrome and a crystal flacon you can turn in your hand.',
   },
@@ -27,6 +31,7 @@ const ROWS = [
     template: 'Editorial',
     mode: 'Photo Motion',
     poster: formHero,
+    cutout: formCutout,
     tint: '#d7ff43',
     line: 'Giant type, full-bleed imagery and a story told in scroll.',
   },
@@ -38,6 +43,7 @@ const ROWS = [
     template: 'Gallery',
     mode: 'True 3D',
     poster: monoPoster,
+    cutout: monoCutout,
     tint: '#d9d5cd',
     line: 'A single object on a plinth, lit like a museum piece.',
   },
@@ -132,32 +138,36 @@ export function Demos() {
         ))}
       </ul>
 
-      {/* Desktop cursor-following poster */}
-      <div
-        ref={preview}
-        aria-hidden
-        className="pointer-events-none absolute left-0 top-0 z-20 hidden md:block"
-        style={{ willChange: 'transform' }}
-      >
-        <div
-          className="relative -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-sm shadow-[0_30px_80px_-20px_rgb(0_0_0/0.7)] transition-[opacity,transform,clip-path] duration-700 ease-out-expo"
-          style={{
-            width: 'min(22vw, 340px)',
-            aspectRatio: '4 / 5',
-            opacity: active === null ? 0 : 1,
-            clipPath: active === null ? 'inset(50% 0 50% 0)' : 'inset(0 0 0 0)',
-          }}
-        >
-          {ROWS.map((row, i) => (
-            <img
-              key={row.slug}
-              src={row.poster}
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 size-full object-cover transition-opacity duration-500"
-              style={{ opacity: active === i ? 1 : 0, backgroundColor: row.slug === 'aura' ? '#09090b' : row.tint }}
-            />
-          ))}
+      {/* Desktop cursor-following product: a transparent cut-out, no frame. */}
+      <div ref={preview} aria-hidden className="pointer-events-none absolute left-0 top-0 z-20 hidden md:block" style={{ willChange: 'transform' }}>
+        <div className="relative -translate-x-1/2 -translate-y-1/2" style={{ width: 'min(19vw, 290px)', aspectRatio: '4 / 5' }}>
+          {ROWS.map((row, i) => {
+            const on = active === i
+            return (
+              <div
+                key={row.slug}
+                className="absolute inset-0 grid place-items-center transition-[opacity,transform,filter] duration-700 ease-out-expo"
+                style={{
+                  opacity: on ? 1 : 0,
+                  transform: on ? 'translateY(0) scale(1) rotate(0deg)' : 'translateY(24px) scale(0.9) rotate(-4deg)',
+                  filter: on ? 'blur(0px)' : 'blur(8px)',
+                }}
+              >
+                {/* Soft light in the brand's tint behind the object, so it sits in the page rather than on it. */}
+                {row.slug !== 'aura' && (
+                  <span className="absolute inset-[18%] rounded-full opacity-25 blur-3xl" style={{ background: row.tint }} />
+                )}
+                <img
+                  src={row.cutout}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="relative max-h-full max-w-full object-contain"
+                  style={{ filter: row.slug === 'aura' ? undefined : 'drop-shadow(0 28px 36px rgb(0 0 0 / 0.55))' }}
+                />
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>
